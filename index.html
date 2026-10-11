@@ -1,0 +1,3146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>법원직 조문 타자 훈련소 | 대한민국 법원</title>
+  
+  <!-- PWA & Native App Meta Tags (Mac Dock / Chrome App / iOS Home Screen) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="조문타자">
+  <link rel="apple-touch-icon" href="court_logo.svg">
+  <link rel="icon" type="image/svg+xml" href="court_logo.svg">
+  
+  <!-- Pretendard Variable & Noto Serif KR -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+            serif: ['"Noto Serif KR"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            court: {
+              navy: '#2563EB',
+              gold: '#6366F1',
+              goldLight: '#818CF8',
+              darkNavy: '#0F172A',
+            },
+            agy: {
+              bg: '#F8FAFC',
+              card: '#FFFFFF',
+              border: '#E2E8F0',
+              darkBg: '#0B0F19',
+              darkCard: '#111827',
+              darkBorder: '#1E293B',
+              indigo: '#6366F1',
+              cyan: '#06B6D4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.4);
+    }
+    @keyframes smoothPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.98); }
+    }
+    .active-word-focus {
+      border-bottom: 2.5px solid #6366F1;
+      background-color: rgba(99, 102, 241, 0.09);
+      border-radius: 4px;
+    }
+    .dark .active-word-focus {
+      border-bottom: 2.5px solid #818CF8;
+      background-color: rgba(129, 140, 248, 0.14);
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] dark:bg-[#0B0F19] text-[#1E293B] dark:text-[#E2E8F0] min-h-screen transition-colors duration-150 antialiased selection:bg-indigo-500/20 dark:selection:bg-indigo-500/30">
+
+  <!-- Top Navigation Bar (Extreme Minimalism) -->
+  <header class="sticky top-0 z-30 bg-[#F8FAFC]/90 dark:bg-[#0B0F19]/90 backdrop-blur-md border-b border-[#E2E8F0] dark:border-[#1E293B] px-6 lg:px-12 py-3">
+    <div class="max-w-[1520px] mx-auto flex items-center justify-between">
+      
+      <!-- Court Identity & Title -->
+      <div class="flex items-center gap-3 cursor-pointer select-none group" onclick="app.showHomeView()" title="홈으로 이동">
+        <div class="w-8 h-8 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xs flex items-center justify-center p-1 transition-transform group-hover:scale-105">
+          <img src="court_logo.svg" alt="대한민국 법원" class="w-full h-full object-contain" />
+        </div>
+        <span class="font-serif font-bold text-base md:text-lg tracking-tight text-[#0F172A] dark:text-white">대한민국 법원 조문 암기</span>
+      </div>
+
+      <!-- Header Tools (Sound, Theme) -->
+      <div class="flex items-center gap-2">
+        <button id="soundToggleBtn" onclick="app.toggleSound()" class="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] transition text-xs shadow-xs cursor-pointer" title="사운드">
+          <span id="soundIcon">🔊</span>
+        </button>
+
+        <button onclick="app.toggleDarkMode()" class="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] transition shadow-xs cursor-pointer" title="테마 전환">
+          <svg id="sunIcon" class="w-4 h-4 hidden dark:block text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg id="moonIcon" class="w-4 h-4 block dark:hidden text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="max-w-[1520px] mx-auto px-6 lg:px-12 py-7 pb-32">
+
+    <!-- ======================================================== -->
+    <!-- VIEW 0: HOME LAUNCHER VIEW (메인 시작 화면: 모드 및 과목 선택) -->
+    <!-- ======================================================== -->
+    <section id="homeView" class="space-y-8 max-w-4xl mx-auto py-6">
+      
+      <!-- Launcher Hero Title -->
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-sm flex items-center justify-center p-2.5">
+          <img src="court_logo.svg" alt="대한민국 법원" class="w-full h-full object-contain" />
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold font-serif text-[#0F172A] dark:text-white tracking-tight">
+          조문 암기
+        </h1>
+      </div>
+
+      <!-- STEP 1: 훈련 모드 선택 -->
+      <div class="space-y-2.5">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
+          1. 훈련 모드
+        </h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Mode Card 1: 조문 정독 필사 -->
+          <div 
+            id="homeCardModeFull" 
+            onclick="app.setHomeMode('full')"
+            class="p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-sm"
+          >
+            <div class="flex items-center gap-3.5">
+              <span class="text-2xl">✍️</span>
+              <div>
+                <h3 class="text-base font-bold text-[#0F172A] dark:text-white">타자연습</h3>
+                <p class="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">조문 정독 필사</p>
+              </div>
+            </div>
+            <span id="homeBadgeModeFull" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">선택됨 ✓</span>
+          </div>
+
+          <!-- Mode Card 2: 빈칸 인출 아케이드 -->
+          <div 
+            id="homeCardModeBlank" 
+            onclick="app.setHomeMode('blank')"
+            class="p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#1E293B] hover:border-indigo-400 shadow-sm"
+          >
+            <div class="flex items-center gap-3.5">
+              <span class="text-2xl">🧩</span>
+              <div>
+                <h3 class="text-base font-bold text-[#0F172A] dark:text-white">빈칸연습</h3>
+                <p class="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">핵심 키워드 인출</p>
+              </div>
+            </div>
+            <span id="homeBadgeModeBlank" class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">선택</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: 시험 과목 선택 -->
+      <div class="space-y-2.5">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
+          2. 과목 선택
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <!-- Subject Card 1: 민법 -->
+          <div 
+            id="homeCardSubCivil" 
+            onclick="app.setHomeSubject('civil')"
+            class="p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-sm"
+          >
+            <div class="flex items-center gap-3.5">
+              <span class="text-2xl">⚖️</span>
+              <div>
+                <h3 class="text-base font-bold text-[#0F172A] dark:text-white">민법</h3>
+                <p class="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">총칙 · 물권 · 채권</p>
+              </div>
+            </div>
+            <span id="homeBadgeSubCivil" class="text-xs font-bold font-mono px-2 py-0.5 rounded text-indigo-600 dark:text-indigo-400">선택됨 ✓</span>
+          </div>
+
+          <!-- Subject Card 2: 민사소송법 -->
+          <div 
+            id="homeCardSubProc" 
+            onclick="app.setHomeSubject('proc')"
+            class="p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#1E293B] hover:border-indigo-400 shadow-sm"
+          >
+            <div class="flex items-center gap-3.5">
+              <span class="text-2xl">🏛️</span>
+              <div>
+                <h3 class="text-base font-bold text-[#0F172A] dark:text-white">민사소송법</h3>
+                <p class="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">총칙 · 제1심 · 상소</p>
+              </div>
+            </div>
+            <span id="homeBadgeSubProc" class="text-xs font-bold font-mono px-2 py-0.5 rounded text-slate-400">선택</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-2 flex justify-center">
+        <button 
+          id="homeProceedBtn"
+          onclick="app.proceedFromHome()" 
+          class="w-full sm:w-auto px-10 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span id="homeProceedBtnText">민법 타자연습 설정하기 →</span>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 1-A: TYPING SETUP VIEW (타자연습 초기 기본화면) -->
+    <!-- ======================================================== -->
+    <section id="typingSetupView" class="hidden space-y-6 max-w-4xl mx-auto py-4">
+      
+      <!-- Top Navigation -->
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <button onclick="app.showHomeView()" class="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-xs font-semibold text-[#0F172A] dark:text-white hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition flex items-center gap-1 shadow-2xs cursor-pointer">
+          <span>← 홈</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span id="typingSetupSubjectBadge" class="text-xs px-2.5 py-1 rounded-lg font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            민법
+          </span>
+          <span class="text-xs px-2.5 py-1 rounded-lg font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            타자연습
+          </span>
+        </div>
+      </div>
+
+      <!-- Section Title -->
+      <div>
+        <h2 class="text-xl font-bold font-serif text-[#0F172A] dark:text-white">타자연습 설정</h2>
+      </div>
+
+      <!-- Step 1: 조문 선택 -->
+      <div class="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-3.5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-[#0F172A] dark:text-white">연습 분량</h3>
+          <span id="typingSetupCountBadge" class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">0개 선택됨</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <button onclick="app.selectPreset('keyTop20', 'typing')" class="p-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100/50 text-indigo-900 dark:text-indigo-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            ⭐ 빈출 TOP 20
+          </button>
+          <button onclick="app.selectPreset('random10', 'typing')" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            10개
+          </button>
+          <button onclick="app.selectPreset('random20', 'typing')" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            20개
+          </button>
+          <button onclick="app.selectPreset('random50', 'typing')" class="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            50개
+          </button>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#1E293B] text-xs">
+          <button onclick="app.selectPreset('part1', 'typing')" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+            <span id="typingPart1PresetText">민총 전체</span>
+          </button>
+          <button onclick="app.selectPreset('clauseOnly', 'typing')" class="px-3 py-1.5 rounded-lg border border-sky-200 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 font-medium cursor-pointer">
+            단서 조문만
+          </button>
+          <button onclick="app.selectPreset('all', 'typing')" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+            전체 선택
+          </button>
+          <button onclick="app.toggleAccordion('typing')" class="px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-100/50 cursor-pointer">
+            직접 선택 / 검색 ▼
+          </button>
+        </div>
+
+        <!-- 여기서부터 시작 Quick Bar -->
+        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-[#0F172A] dark:text-white whitespace-nowrap">📍 여기서부터 10개:</span>
+            <div class="relative flex items-center">
+              <span class="absolute left-2 text-xs text-slate-400 font-mono pointer-events-none">제</span>
+              <input 
+                type="text" 
+                id="typingStartFromArtNo" 
+                placeholder="103" 
+                class="w-20 pl-5 pr-5 py-1 rounded-md bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-700 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100"
+                onkeydown="if (event.key === 'Enter') app.startFromArticleInput('typing')"
+              />
+              <span class="absolute right-2 text-xs text-slate-400 font-mono pointer-events-none">조</span>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onclick="app.startFromArticleInput('typing')" 
+            class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow-2xs whitespace-nowrap"
+          >
+            시작 ▶
+          </button>
+        </div>
+
+        <!-- Collapsible Custom Selection Tree -->
+        <div id="typingAccordion" class="hidden pt-3 space-y-3">
+          <input 
+            type="text" 
+            id="typingSearchInput"
+            placeholder="조문 검색..."
+            oninput="app.handleSearchInput(this.value, 'typing')"
+            class="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-[#070B14] border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+          <div id="typingArticleTreeContainer" class="space-y-4 max-h-80 overflow-y-auto custom-scroll p-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: 출제 방식 -->
+      <div class="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-3.5">
+        <h3 class="text-sm font-bold text-[#0F172A] dark:text-white">출제 순서</h3>
+
+        <div class="grid grid-cols-2 gap-3.5">
+          <div 
+            id="typingOrderSequentialCard"
+            onclick="app.setOrderMode('sequential')"
+            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-xs"
+          >
+            <span class="font-bold text-sm text-[#0F172A] dark:text-white">순서대로</span>
+            <span id="typingBadgeSequential" class="text-xs font-bold text-indigo-600 font-mono">선택됨 ✓</span>
+          </div>
+
+          <div 
+            id="typingOrderRandomCard"
+            onclick="app.setOrderMode('random')"
+            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 hover:border-indigo-400 shadow-xs"
+          >
+            <span class="font-bold text-sm text-[#0F172A] dark:text-white">무작위 섞기</span>
+            <span id="typingBadgeRandom" class="text-xs text-slate-400 font-mono">선택</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-2 flex justify-center">
+        <button 
+          id="typingStartBtn"
+          onclick="app.startTypingPractice()" 
+          class="w-full sm:w-auto px-10 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span>타자연습 시작</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-indigo-700/60 text-[10px] font-mono">↵</kbd>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 2-A: TYPING PLAY VIEW (타자연습 실행 화면) -->
+    <!-- ======================================================== -->
+    <section id="typingPlayView" class="hidden space-y-6 max-w-5xl mx-auto py-2">
+      
+      <!-- Top Navigation & Breadcrumbs -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <div class="flex items-center gap-3">
+          <button onclick="app.showTypingSetupView()" class="p-2 rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] transition shadow-2xs cursor-pointer" title="설정 화면으로 나가기">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="typingPlayLawBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-mono">민법</span>
+              <span id="typingPlayPathText" class="text-xs text-[#64748B] dark:text-[#94A3B8]">제1편 총칙</span>
+            </div>
+            <h2 id="typingPlayArticleTitle" class="hidden"></h2>
+          </div>
+        </div>
+
+        <!-- Session Progress Indicator & Pause/Settings Button -->
+        <div class="flex items-center gap-3.5 text-xs">
+          <div class="text-right">
+            <span class="text-[#64748B] dark:text-[#94A3B8]">진행도</span>
+            <div id="typingPlayProgressText" class="font-bold text-sm text-[#0F172A] dark:text-white font-mono">1 / 20 조문</div>
+          </div>
+          <div class="w-24 sm:w-28 bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2.5 overflow-hidden p-0.5">
+            <div id="typingPlayProgressBar" class="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-300" style="width: 5%;"></div>
+          </div>
+          <button onclick="app.togglePauseSettings(true)" class="px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="설정 및 일시정지 (ESC)">
+            <span>⚙️ 설정</span>
+            <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">ESC</kbd>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Minimal Dashboard (속도, 정확도, 경과시간) -->
+      <div class="grid grid-cols-3 gap-3.5">
+        <div class="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xs">
+          <div class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mb-1">속도</div>
+          <div class="text-2xl md:text-3xl font-bold font-mono tracking-tight text-[#0F172A] dark:text-white flex items-baseline gap-1.5">
+            <span id="typingStatCpm">0</span>
+            <span class="text-xs text-[#64748B] font-normal font-sans">타/분</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xs">
+          <div class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mb-1">정확도</div>
+          <div class="text-2xl md:text-3xl font-bold font-mono tracking-tight text-[#0F172A] dark:text-white flex items-baseline gap-1.5">
+            <span id="typingStatAccuracy">100</span>
+            <span class="text-xs text-[#64748B] font-normal font-sans">%</span>
+          </div>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xs">
+          <div class="text-[11px] text-[#64748B] dark:text-[#94A3B8] mb-1">시간</div>
+          <div id="typingStatTime" class="text-2xl md:text-3xl font-bold font-mono tracking-tight text-[#0F172A] dark:text-white">00:00</div>
+        </div>
+      </div>
+
+      <!-- Main Typing Canvas -->
+      <div class="p-6 md:p-10 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-6">
+        
+        <!-- Focus Zone Header (시선 일치형 조문/항 식별 배너) -->
+        <div class="p-3.5 sm:p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span id="typingFocusLawBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-indigo-600 text-white shadow-2xs">
+              민법 제107조
+            </span>
+            <span id="typingFocusClauseBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+              제1항
+            </span>
+            <span id="typingFocusTitleText" class="text-base sm:text-lg font-bold text-[#0F172A] dark:text-white font-serif">
+              (진의 아닌 의사표시)
+            </span>
+            <span id="typingFocusKeyBadge" class="text-[11px] px-2 py-0.5 rounded font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/40">
+              빈출 A급
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono text-[#64748B] dark:text-[#94A3B8]">
+            <span id="typingFocusPartText" class="hidden sm:inline text-[11px] text-slate-400">제1편 총칙</span>
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <span id="typingFocusArticleProgress" class="font-bold text-indigo-600 dark:text-indigo-400">1 / 20 조문</span>
+          </div>
+        </div>
+
+        <!-- Word Stream Box -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+              <span class="font-semibold text-[#0F172A] dark:text-white px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#1E293B]">조문 정독 필사</span>
+            </div>
+            <span id="typingWordCounterText" class="font-mono">0 / 0 어절</span>
+          </div>
+
+          <div id="typingWordsContainer" class="text-xl md:text-2xl leading-relaxed md:leading-[2.4] font-sans p-6 md:p-8 rounded-xl bg-[#F8FAFC] dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] min-h-[160px] flex flex-wrap gap-x-2.5 gap-y-3 items-center select-none custom-scroll overflow-y-auto max-h-[380px]">
+            <!-- Dynamic Words -->
+          </div>
+        </div>
+
+        <!-- Input Box -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="typingPlayInput" 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false"
+            placeholder="조문을 정독하며 타이핑하세요. 단어를 치고 Space를 누르면 다음 단어로 넘어갑니다..."
+            class="w-full px-6 py-4 rounded-xl bg-white dark:bg-[#1E293B] border-2 border-indigo-500 focus:outline-none text-xl md:text-2xl font-sans tracking-wide shadow-sm"
+          />
+          <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono border border-slate-200 dark:border-slate-700">
+              Space / ↵ Return
+            </span>
+          </div>
+        </div>
+
+        <!-- Shortcut Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-[#787774] dark:text-[#8E8D8A] pt-1">
+          <div class="flex items-center gap-4">
+            <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">Space</kbd> 다음 어절</span>
+            <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">⎋ Esc</kbd> 설정 및 일시정지</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="app.prevArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">이전 조문</button>
+            <button onclick="app.skipArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">건너뛰기</button>
+            <button onclick="app.restartCurrentArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">다시 치기</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 1-B: BLANK SETUP VIEW (빈칸연습 초기 기본화면) -->
+    <!-- ======================================================== -->
+    <section id="blankSetupView" class="hidden space-y-6 max-w-5xl mx-auto py-2">
+      
+      <!-- Top Navigation -->
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <button onclick="app.showHomeView()" class="px-3.5 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] text-xs font-semibold text-[#0F172A] dark:text-white hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
+          <span>← 홈 (과목 / 모드 변경)</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <span id="blankSetupSubjectBadge" class="text-xs px-2.5 py-1 rounded-lg font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            ⚖️ 민법
+          </span>
+          <span class="text-xs px-2.5 py-1 rounded-lg font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            🧩 빈칸연습 설정
+          </span>
+        </div>
+      </div>
+
+      <!-- Section Title -->
+      <div>
+        <h2 class="text-xl sm:text-2xl font-bold font-serif text-[#0F172A] dark:text-white">빈칸연습 설정</h2>
+      </div>
+
+      <!-- Step 1: 조문 몇 개? -->
+      <div class="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm sm:text-base font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
+            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-mono font-bold">1</span>
+            <span>조문 범위</span>
+          </h3>
+          <span id="blankSetupCountBadge" class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">0개 선택됨</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <button onclick="app.selectPreset('keyTop20', 'blank')" class="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/30 hover:bg-indigo-100/50 text-indigo-900 dark:text-indigo-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            <span>⭐ 빈출 TOP 20</span>
+          </button>
+          <button onclick="app.selectPreset('random10', 'blank')" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            <span>10개</span>
+          </button>
+          <button onclick="app.selectPreset('random20', 'blank')" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            <span>20개</span>
+          </button>
+          <button onclick="app.selectPreset('random50', 'blank')" class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] hover:bg-slate-50 text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-bold transition flex items-center justify-center cursor-pointer shadow-2xs">
+            <span>50개</span>
+          </button>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#1E293B] text-xs">
+          <button onclick="app.selectPreset('clauseOnly', 'blank')" class="px-3 py-1.5 rounded-lg border border-sky-200 dark:border-sky-800/60 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 font-medium cursor-pointer">
+            단서 조문만
+          </button>
+          <button onclick="app.selectPreset('all', 'blank')" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-medium cursor-pointer">
+            전체 선택
+          </button>
+          <button onclick="app.toggleAccordion('blank')" class="px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-100/50 cursor-pointer">
+            직접 선택 / 검색 ▼
+          </button>
+        </div>
+
+        <!-- 여기서부터 시작 Quick Bar -->
+        <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-[#0F172A] dark:text-white whitespace-nowrap">📍 여기서부터 10개:</span>
+            <div class="relative flex items-center">
+              <span class="absolute left-2 text-xs text-slate-400 font-mono pointer-events-none">제</span>
+              <input 
+                type="text" 
+                id="blankStartFromArtNo" 
+                placeholder="103" 
+                class="w-20 pl-5 pr-5 py-1 rounded-md bg-white dark:bg-[#111827] border border-slate-300 dark:border-slate-700 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 dark:text-slate-100"
+                onkeydown="if (event.key === 'Enter') app.startFromArticleInput('blank')"
+              />
+              <span class="absolute right-2 text-xs text-slate-400 font-mono pointer-events-none">조</span>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onclick="app.startFromArticleInput('blank')" 
+            class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow-2xs whitespace-nowrap"
+          >
+            시작 ▶
+          </button>
+        </div>
+
+        <!-- Collapsible Custom Selection Tree -->
+        <div id="blankAccordion" class="hidden pt-3 space-y-3">
+          <input 
+            type="text" 
+            id="blankSearchInput"
+            placeholder="조문 번호 또는 표제어 검색..."
+            oninput="app.handleSearchInput(this.value, 'blank')"
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#070B14] border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+          />
+          <div id="blankArticleTreeContainer" class="space-y-4 max-h-96 overflow-y-auto custom-scroll p-1">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: 출제 방식 (얼마나 섞어서? 그대로?) -->
+      <div class="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-4">
+        <h3 class="text-sm sm:text-base font-bold text-[#0F172A] dark:text-white flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center font-mono font-bold">2</span>
+          <span>출제 방식</span>
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div 
+            id="blankOrderSequentialCard"
+            onclick="app.setOrderMode('sequential')"
+            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-xs"
+          >
+            <div class="font-bold text-sm text-[#0F172A] dark:text-white">순서대로</div>
+            <span id="blankBadgeSequential" class="text-xs font-bold text-indigo-600 font-mono">선택됨 ✓</span>
+          </div>
+
+          <div 
+            id="blankOrderRandomCard"
+            onclick="app.setOrderMode('random')"
+            class="p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 hover:border-indigo-400 shadow-xs"
+          >
+            <div class="font-bold text-sm text-[#0F172A] dark:text-white">무작위 섞기</div>
+            <span id="blankBadgeRandom" class="text-xs text-slate-400 font-mono">선택</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-2 flex justify-center">
+        <button 
+          id="blankStartBtn"
+          onclick="app.startBlankPractice()" 
+          class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-base shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <span>빈칸연습 시작</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-indigo-700/60 text-[11px] font-mono">↵</kbd>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 2-B: BLANK PLAY VIEW (빈칸연습 실행 화면) -->
+    <!-- ======================================================== -->
+    <section id="blankPlayView" class="hidden space-y-6 max-w-5xl mx-auto py-2">
+      
+      <!-- Top Navigation & Progress -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <div class="flex items-center gap-3">
+          <button onclick="app.showBlankSetupView()" class="p-2 rounded-xl border border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#1E293B] text-[#64748B] dark:text-[#94A3B8] transition shadow-2xs cursor-pointer" title="설정 화면으로 나가기">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="blankPlayLawBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-mono">민법</span>
+              <span id="blankPlayPathText" class="text-xs text-[#64748B] dark:text-[#94A3B8]">제1편 총칙</span>
+            </div>
+            <h2 id="blankPlayArticleTitle" class="hidden"></h2>
+          </div>
+        </div>
+
+        <!-- Session Progress Indicator & Pause/Settings Button -->
+        <div class="flex items-center gap-3.5 text-xs">
+          <div class="text-right">
+            <span class="text-[#64748B] dark:text-[#94A3B8]">진행도</span>
+            <div id="blankPlayProgressText" class="font-bold text-sm text-[#0F172A] dark:text-white font-mono">1 / 10 조문</div>
+          </div>
+          <div class="w-24 sm:w-28 bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2.5 overflow-hidden p-0.5">
+            <div id="blankPlayProgressBar" class="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-300" style="width: 10%;"></div>
+          </div>
+          <button onclick="app.togglePauseSettings(true)" class="px-3 py-1.5 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="설정 및 일시정지 (ESC)">
+            <span>⚙️ 설정</span>
+            <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">ESC</kbd>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Blank Canvas -->
+      <div class="p-6 md:p-10 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] shadow-xs space-y-6">
+        
+        <!-- Focus Zone Header (시선 일치형 조문/항 식별 배너) -->
+        <div class="p-3.5 sm:p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span id="blankFocusLawBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-indigo-600 text-white shadow-2xs">
+              민법 제107조
+            </span>
+            <span id="blankFocusClauseBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold font-mono bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
+              제1항
+            </span>
+            <span id="blankFocusTitleText" class="text-base sm:text-lg font-bold text-[#0F172A] dark:text-white font-serif">
+              (진의 아닌 의사표시)
+            </span>
+            <span id="blankFocusKeyBadge" class="text-[11px] px-2 py-0.5 rounded font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/40">
+              빈출 A급
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono text-[#64748B] dark:text-[#94A3B8]">
+            <span id="blankFocusPartText" class="hidden sm:inline text-[11px] text-slate-400">제1편 총칙</span>
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <span id="blankFocusArticleProgress" class="font-bold text-indigo-600 dark:text-indigo-400">1 / 10 조문</span>
+          </div>
+        </div>
+
+        <!-- Words Stream Box -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs text-[#64748B] dark:text-[#94A3B8]">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <span class="font-semibold text-[#0F172A] dark:text-white px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#1E293B]">빈칸 인출</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <button id="blankHintBtn" onclick="app.toggleHint()" class="px-3 py-1 rounded-lg border border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                <span>💡 힌트</span>
+                <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">⌘H</kbd>
+              </button>
+              <span id="blankWordCounterText" class="font-mono">0 / 0 빈칸</span>
+            </div>
+          </div>
+
+          <!-- 7-Second Time Attack Gauge Bar -->
+          <div id="blankTimeAttackContainer" class="hidden w-full bg-[#E2E8F0] dark:bg-[#1E293B] rounded-full h-2 overflow-hidden mb-1">
+            <div id="blankTimeAttackBar" class="bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-500 h-full transition-all duration-75" style="width: 100%;"></div>
+          </div>
+
+          <div id="blankWordsContainer" class="text-xl md:text-2xl leading-relaxed md:leading-[2.4] font-sans p-6 md:p-8 rounded-xl bg-[#F8FAFC] dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] min-h-[160px] flex flex-wrap gap-x-2.5 gap-y-3 items-center select-none custom-scroll overflow-y-auto max-h-[380px]">
+            <!-- Dynamic Words & Blanks -->
+          </div>
+        </div>
+
+        <!-- 4-Choice Quickpad (Emergency Hint Pad) -->
+        <div id="blankQuickpad" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <!-- Populated dynamically when in hintStage 2 -->
+        </div>
+
+        <!-- Input Box -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="blankPlayInput" 
+            autocomplete="off" 
+            autocorrect="off" 
+            autocapitalize="off" 
+            spellcheck="false"
+            placeholder="빈칸의 단어를 입력하세요 (↵ 제출 / ⌘H 힌트)..."
+            class="w-full px-6 py-4 rounded-xl bg-white dark:bg-[#1E293B] border-2 border-indigo-500 focus:outline-none text-xl md:text-2xl font-sans tracking-wide shadow-sm"
+          />
+          <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
+            <span class="text-xs px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono border border-slate-200 dark:border-slate-700">
+              ↵ Return
+            </span>
+          </div>
+        </div>
+
+        <!-- Answer Statute Reference Box (정답 조문 전문 확인창) -->
+        <div class="rounded-2xl bg-slate-50 dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] overflow-hidden shadow-2xs">
+          <button 
+            type="button" 
+            onclick="app.toggleAnswerStatute()"
+            class="w-full px-5 py-3.5 flex items-center justify-between text-left hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition cursor-pointer"
+          >
+            <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+              <span>📖 정답 조문 확인</span>
+              <span id="blankAnswerStatuteBadge" class="text-[11px] px-2 py-0.5 rounded font-mono bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-normal">펼치기 ▼</span>
+            </div>
+          </button>
+          <div id="blankAnswerStatuteContent" class="hidden px-5 py-4 border-t border-slate-200 dark:border-slate-800 text-sm md:text-base font-sans leading-relaxed text-slate-800 dark:text-slate-200 bg-white/60 dark:bg-[#111827]/60">
+            <!-- Full pristine statutory text with blank words highlighted in bold cyan -->
+          </div>
+        </div>
+
+        <!-- Shortcut Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-[#787774] dark:text-[#8E8D8A] pt-1">
+          <div class="flex items-center gap-4">
+            <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">↵ Return</kbd> 제출</span>
+            <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">⌘ Cmd+H</kbd> 힌트</span>
+            <span><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono">⎋ Esc</kbd> 설정 및 일시정지</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="app.prevArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">이전 조문</button>
+            <button onclick="app.skipArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"><span>건너뛰기</span></button>
+            <button onclick="app.restartCurrentArticle()" class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">다시 풀기</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 3: SESSION RESULT VIEW (학습 결과 화면) -->
+    <!-- ======================================================== -->
+    <section id="resultView" class="hidden space-y-6">
+      
+      <div class="p-8 md:p-12 rounded-2xl bg-white dark:bg-[#1C1C1C] border border-[#E8E7E4] dark:border-[#282828] shadow-xs text-center space-y-8 max-w-3xl mx-auto">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-white dark:bg-[#222] border border-[#E8E7E4] dark:border-[#2E2E2E] shadow-xs flex items-center justify-center p-3">
+          <img src="court_logo.svg" alt="대한민국 법원" class="w-full h-full object-contain" />
+        </div>
+        
+        <div class="space-y-1.5">
+          <h2 class="text-2xl md:text-3xl font-bold font-serif text-[#222] dark:text-white">훈련 완료</h2>
+          <p id="resultSubtitle" class="text-sm text-[#787774] dark:text-[#9B9A97]">선택한 조문 훈련을 완료했습니다.</p>
+        </div>
+
+        <!-- Blank Arcade Diagnostic Banner -->
+        <div id="blankDiagnosticBanner" class="hidden p-4 rounded-xl border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/70 dark:bg-indigo-950/40 text-left space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-sm text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <span>⚡</span> 인출 진단 리포트
+            </span>
+            <span id="diagnosticRankBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-indigo-600 text-white font-mono">
+              실전 합격권
+            </span>
+          </div>
+          <p id="diagnosticSummary" class="text-xs text-indigo-800/80 dark:text-indigo-300/80 leading-relaxed">
+            평균 0.0초의 즉각 인출 반응 속도로 법원직 객관식 지문 판별에 최적화되어 있습니다.
+          </p>
+        </div>
+
+        <!-- Metric Summary Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 text-left">
+          <div class="p-4 rounded-xl bg-[#FAF9F6] dark:bg-[#151515] border border-[#E8E7E4] dark:border-[#262626]">
+            <div class="text-[11px] text-[#787774] dark:text-[#8E8D8A]">속도</div>
+            <div class="text-2xl font-bold font-mono text-[#222] dark:text-white mt-1"><span id="resultAvgCpm">0</span> <span class="text-xs font-normal font-sans">타/분</span></div>
+          </div>
+          <div class="p-4 rounded-xl bg-[#FAF9F6] dark:bg-[#151515] border border-[#E8E7E4] dark:border-[#262626]">
+            <div class="text-[11px] text-[#787774] dark:text-[#8E8D8A]">정확도</div>
+            <div class="text-2xl font-bold font-mono text-[#222] dark:text-white mt-1"><span id="resultAvgAccuracy">0</span> <span class="text-xs font-normal font-sans">%</span></div>
+          </div>
+          <div class="p-4 rounded-xl bg-[#FAF9F6] dark:bg-[#151515] border border-[#E8E7E4] dark:border-[#262626]">
+            <div id="resultMetric3Label" class="text-[11px] text-[#787774] dark:text-[#8E8D8A]">시간</div>
+            <div id="resultTotalTime" class="text-2xl font-bold font-mono text-[#222] dark:text-white mt-1">00:00</div>
+          </div>
+          <div class="p-4 rounded-xl bg-[#FAF9F6] dark:bg-[#151515] border border-[#E8E7E4] dark:border-[#262626]">
+            <div id="resultMetric4Label" class="text-[11px] text-[#787774] dark:text-[#8E8D8A]">완료 조문</div>
+            <div class="text-2xl font-bold font-mono text-[#222] dark:text-white mt-1"><span id="resultCompletedCount">0</span> <span class="text-xs font-normal font-sans">개</span></div>
+          </div>
+        </div>
+
+        <!-- Mistake Words List -->
+        <div id="mistakeBox" class="text-left space-y-3 pt-2">
+          <h3 class="text-sm font-semibold flex items-center gap-2">
+            <span>📝 오답노트</span>
+            <span id="mistakeBadge" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">0개</span>
+          </h3>
+          <div id="mistakeList" class="space-y-2 text-sm custom-scroll max-h-56 overflow-y-auto pr-1">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-[#E8E7E4] dark:border-[#262626]">
+          <button id="btnSpeedrunMistakes" onclick="app.retryMistakeArticlesOnly()" class="hidden px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 text-white font-semibold text-sm shadow hover:opacity-90 transition flex items-center gap-1.5">
+            <span>🔥 틀린 빈칸만 재도전</span>
+          </button>
+          <button onclick="app.restartSession()" class="px-5 py-2.5 rounded-xl border border-[#E8E7E4] dark:border-[#2E2E2E] bg-white dark:bg-[#1E1E1E] hover:bg-[#F2F1EE] dark:hover:bg-[#282828] font-semibold text-sm transition cursor-pointer">
+            다시 연습
+          </button>
+          <button onclick="app.showSelectView()" class="px-5 py-2.5 rounded-xl border border-[#E8E7E4] dark:border-[#2E2E2E] bg-white dark:bg-[#1E1E1E] hover:bg-[#F2F1EE] dark:hover:bg-[#282828] font-semibold text-sm transition cursor-pointer">
+            조문 재설정
+          </button>
+          <button onclick="app.showHomeView()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow transition cursor-pointer">
+            홈으로
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Sticky Bottom Bar for Article Selection (Legacy - Hidden in new 5-screen flow) -->
+  <footer id="selectorStickyBar" class="hidden fixed bottom-0 left-0 right-0 z-20 bg-white/95 dark:bg-[#1C1C1C]/95 backdrop-blur-md border-t border-[#E8E7E4] dark:border-[#262626] py-3.5 px-6 lg:px-12 shadow-lg transition-transform duration-200">
+    <div class="max-w-[1520px] mx-auto flex items-center justify-between">
+      
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-court-navy dark:bg-court-gold animate-pulse"></span>
+          <span class="text-sm font-medium">선택된 조문:</span>
+          <span id="stickySelectedCount" class="text-lg font-bold font-mono text-court-navy dark:text-court-gold">0</span>
+          <span class="text-xs text-[#787774]">개</span>
+        </div>
+        <div class="hidden sm:block text-xs text-[#787774] dark:text-[#8E8D8A]">
+          (총 <span id="stickyWordCount" class="font-mono font-medium text-[#222] dark:text-white">0</span>단어 체화 예정)
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="shuffleToggleBtn" onclick="app.toggleShuffle()" class="px-3 py-1.5 rounded-lg border border-[#E0E0DF] dark:border-[#333] bg-[#FAF9F6] dark:bg-[#252525] text-[#787774] dark:text-[#8E8D8A] text-xs font-medium hover:bg-[#F0EFEA] dark:hover:bg-[#303030] transition flex items-center gap-1.5 shadow-2xs" title="조문 출제 순서를 무작위로 섞어서 연습합니다">
+          <span id="shuffleIcon">🔢</span>
+          <span id="shuffleText">순서대로</span>
+        </button>
+        <button onclick="app.clearSelection()" class="text-xs text-[#787774] dark:text-[#8E8D8A] hover:underline px-2 py-1">선택 비우기</button>
+        <button id="startPracticeBtn" onclick="app.startPractice()" disabled class="px-6 py-2.5 rounded-xl bg-[#2B2B2B] text-white dark:bg-white dark:text-[#191919] font-semibold text-sm shadow hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2">
+          <span>타자 훈련 시작</span>
+          <kbd class="hidden md:inline-block px-1.5 py-0.5 rounded bg-white/20 dark:bg-black/10 text-[10px] font-mono">↵ Return</kbd>
+        </button>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PAUSE & SETTINGS OVERLAY (일시정지 및 설정 창 - ESC) -->
+  <!-- ======================================================== -->
+  <div id="pauseSettingsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-200 opacity-0 pointer-events-none hidden">
+    <div id="pauseModalCard" class="max-w-lg w-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] rounded-3xl shadow-2xl p-6 sm:p-8 space-y-5 transform transition-all duration-200 scale-95 max-h-[90vh] overflow-y-auto custom-scroll">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#1E293B]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-lg shadow-2xs">
+            ⏸️
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-[#0F172A] dark:text-white">일시정지</h3>
+            <p class="text-xs text-[#64748B] dark:text-[#94A3B8]"><kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 font-mono text-[10px]">ESC</kbd>를 누르면 재개됩니다.</p>
+          </div>
+        </div>
+        <button onclick="app.resumePractice()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" title="닫기 (ESC)">
+          ✕
+        </button>
+      </div>
+
+      <!-- Current Session Info Card -->
+      <div class="p-3.5 rounded-2xl bg-[#F8FAFC] dark:bg-[#070B14] border border-[#E2E8F0] dark:border-[#1E293B] flex items-center justify-between">
+        <div>
+          <span id="modalCurrentLawBadge" class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">민법 제107조</span>
+          <h4 id="modalCurrentTitle" class="text-sm font-bold font-serif text-[#0F172A] dark:text-white mt-0.5">(진의 아닌 의사표시)</h4>
+        </div>
+        <div class="text-right text-xs font-mono">
+          <div class="text-slate-400">진행도</div>
+          <div id="modalProgressRatio" class="font-bold text-indigo-600 dark:text-indigo-400">1 / 20 조문</div>
+        </div>
+      </div>
+
+      <!-- Settings List -->
+      <div class="space-y-2 text-xs sm:text-sm">
+        
+        <!-- Setting 1: 키보드 사운드 -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60">
+          <div class="font-semibold text-[#0F172A] dark:text-white">키보드 사운드</div>
+          <button id="modalSoundBtn" onclick="app.toggleSound(); app.updateModalUI();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer">
+            사운드 켬
+          </button>
+        </div>
+
+        <!-- Setting 2: 단어 위계 표시 -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60">
+          <div class="font-semibold text-[#0F172A] dark:text-white">단어 시각 위계</div>
+          <button id="modalHierarchyBtn" onclick="app.toggleHierarchy(); app.updateModalUI();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer">
+            위계 켬
+          </button>
+        </div>
+
+        <!-- Setting 3: 타임어택 (빈칸 모드) -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60">
+          <div class="font-semibold text-[#0F172A] dark:text-white">7초 타임어택</div>
+          <button id="modalTimeAttackBtn" onclick="app.toggleTimeAttack(); app.updateModalUI();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer">
+            타임어택 켬
+          </button>
+        </div>
+
+        <!-- Setting 4: 화면 테마 (다크/라이트) -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60">
+          <div class="font-semibold text-[#0F172A] dark:text-white">화면 테마</div>
+          <button id="modalThemeBtn" onclick="app.toggleDarkMode(); app.updateModalUI();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 cursor-pointer">
+            테마 전환
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="space-y-2 pt-2 border-t border-[#E2E8F0] dark:border-[#1E293B]">
+        <button onclick="app.resumePractice()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+          <span>▶️ 계속하기</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-indigo-700/60 text-[10px] font-mono">↵ / ESC</kbd>
+        </button>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <button onclick="app.restartCurrentArticleFromModal()" class="py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition cursor-pointer">
+            🔄 처음부터
+          </button>
+          <button onclick="app.exitToSelectViewFromModal()" class="py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium transition cursor-pointer">
+            📋 조문 선택
+          </button>
+          <button onclick="app.exitToHomeFromModal()" class="py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-rose-600 dark:text-rose-400 font-medium transition cursor-pointer">
+            🏠 홈
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- TOAST: ARTICLE TRANSITION INTERSTITIAL FLASH (중앙 조문 플래시 배너) -->
+  <!-- ======================================================== -->
+  <div id="articleTransitionOverlay" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center pointer-events-none transition-all duration-250 opacity-0 hidden">
+    <div id="transitionCard" class="transform transition-all duration-250 scale-90 p-8 sm:p-10 rounded-3xl bg-white/95 dark:bg-[#111827]/95 border border-[#E2E8F0] dark:border-[#1E293B] shadow-2xl text-center space-y-3 max-w-md w-[88%]">
+      <div class="flex items-center justify-center gap-2">
+        <span id="transSubjectBadge" class="px-3 py-1 rounded-full text-xs font-bold font-mono bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50">민법</span>
+        <span id="transKeyBadge" class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">⭐ 빈출 A급</span>
+      </div>
+      <div class="space-y-1">
+        <div id="transArticleNo" class="text-3xl sm:text-4xl font-black font-mono tracking-tight text-[#0F172A] dark:text-white">제108조</div>
+        <div id="transArticleTitle" class="text-xl sm:text-2xl font-bold font-serif text-slate-700 dark:text-slate-200">(통정한 허위의 의사표시)</div>
+      </div>
+      <div id="transPath" class="text-xs text-slate-400 font-sans">제1편 총칙 > 제5장 법률행위</div>
+      <div class="pt-1">
+        <span id="transProgress" class="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">2 / 20 조문</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Law Data Script -->
+  <script src="data.js"></script>
+  <!-- Law External Schema Engine -->
+  <script src="schema.js"></script>
+
+  <!-- Application Logic -->
+  <script>
+    /**
+     * Mechanical Keyboard Sound Engine via Web Audio API (Zero Latency Synthesizer)
+     */
+    const SoundEngine = {
+      ctx: null,
+      enabled: localStorage.getItem('lawtyping_sound') !== 'false',
+      soundType: localStorage.getItem('lawtyping_sound_type') || 'mechanical',
+
+      profiles: {
+        mechanical: { id: 'mechanical', name: '기계식 청축', icon: '🔊', desc: '경쾌한 청축 클릭음' },
+        thock: { id: 'thock', name: '도자기 Thock', icon: '🪵', desc: '묵직한 윤활 조약돌음' },
+        typewriter: { id: 'typewriter', name: '레트로 타자기', icon: '⌨️', desc: '찰진 금속 타자기음' },
+        bubble: { id: 'bubble', name: '보글 무접점', icon: '🫧', desc: '부드러운 물방울 팝' },
+        woodblock: { id: 'woodblock', name: '목탁 우드블록', icon: '🥢', desc: '청명한 사찰 목탁음' }
+      },
+
+      profileOrder: ['mechanical', 'thock', 'typewriter', 'bubble', 'woodblock'],
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      playKey() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const t = this.ctx.currentTime;
+          
+          if (this.soundType === 'thock') {
+            // Profile 2: 도자기 Thock (저음 윤활 조약돌 뽀각)
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            
+            osc.type = 'sine';
+            const baseFreq = 240 + (Math.random() * 40 - 20);
+            osc.frequency.setValueAtTime(baseFreq, t);
+            osc.frequency.exponentialRampToValueAtTime(65, t + 0.045);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(420, t);
+            filter.Q.setValueAtTime(3.2, t);
+            
+            gain.gain.setValueAtTime(0.24, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.045);
+
+            const knock = this.ctx.createOscillator();
+            const knockGain = this.ctx.createGain();
+            knock.type = 'triangle';
+            knock.frequency.setValueAtTime(480, t);
+            knock.frequency.exponentialRampToValueAtTime(120, t + 0.015);
+            knockGain.gain.setValueAtTime(0.08, t);
+            knockGain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+            knock.connect(knockGain);
+            knockGain.connect(this.ctx.destination);
+            knock.start(t);
+            knock.stop(t + 0.015);
+
+          } else if (this.soundType === 'typewriter') {
+            // Profile 3: 레트로 타자기 (철컥 금속 레버 타격음)
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880 + Math.random() * 120, t);
+            osc.frequency.exponentialRampToValueAtTime(180, t + 0.028);
+            gain.gain.setValueAtTime(0.06, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.028);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.028);
+
+            const clack = this.ctx.createOscillator();
+            const clackGain = this.ctx.createGain();
+            clack.type = 'triangle';
+            clack.frequency.setValueAtTime(1400 + Math.random() * 200, t);
+            clack.frequency.exponentialRampToValueAtTime(380, t + 0.022);
+            clackGain.gain.setValueAtTime(0.05, t);
+            clackGain.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
+            clack.connect(clackGain);
+            clackGain.connect(this.ctx.destination);
+            clack.start(t);
+            clack.stop(t + 0.022);
+
+          } else if (this.soundType === 'bubble') {
+            // Profile 4: 보글 무접점 (귀가 편안한 물방울 팝)
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            const startF = 310 + Math.random() * 70;
+            osc.frequency.setValueAtTime(startF, t);
+            osc.frequency.exponentialRampToValueAtTime(startF * 1.85, t + 0.03);
+            gain.gain.setValueAtTime(0.18, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.032);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.032);
+
+          } else if (this.soundType === 'woodblock') {
+            // Profile 5: 목탁 우드블록 (청명한 사찰 목탁음)
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            const filter = this.ctx.createBiquadFilter();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(720 + Math.random() * 40, t);
+            osc.frequency.exponentialRampToValueAtTime(260, t + 0.04);
+            
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(780, t);
+            filter.Q.setValueAtTime(6.0, t);
+            
+            gain.gain.setValueAtTime(0.24, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.04);
+
+          } else {
+            // Profile 1: 기계식 청축 (날카로운 메탈 스냅)
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(550 + Math.random() * 250, t);
+            osc.frequency.exponentialRampToValueAtTime(100, t + 0.035);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.035);
+
+            const snap = this.ctx.createOscillator();
+            const snapGain = this.ctx.createGain();
+            snap.type = 'triangle';
+            snap.frequency.setValueAtTime(1900 + Math.random() * 350, t);
+            snap.frequency.exponentialRampToValueAtTime(750, t + 0.012);
+            snapGain.gain.setValueAtTime(0.045, t);
+            snapGain.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
+            snap.connect(snapGain);
+            snapGain.connect(this.ctx.destination);
+            snap.start(t);
+            snap.stop(t + 0.012);
+          }
+        } catch (e) {}
+      },
+
+      playSpace() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const t = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          if (this.soundType === 'thock') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(160, t);
+            osc.frequency.exponentialRampToValueAtTime(45, t + 0.06);
+            gain.gain.setValueAtTime(0.28, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+          } else if (this.soundType === 'typewriter') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(360, t);
+            osc.frequency.exponentialRampToValueAtTime(80, t + 0.05);
+            gain.gain.setValueAtTime(0.1, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+          } else if (this.soundType === 'bubble') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(220, t);
+            osc.frequency.exponentialRampToValueAtTime(460, t + 0.045);
+            gain.gain.setValueAtTime(0.24, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+          } else if (this.soundType === 'woodblock') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(480, t);
+            osc.frequency.exponentialRampToValueAtTime(140, t + 0.05);
+            gain.gain.setValueAtTime(0.26, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+          } else {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, t);
+            osc.frequency.exponentialRampToValueAtTime(70, t + 0.05);
+            gain.gain.setValueAtTime(0.18, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+          }
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.06);
+        } catch (e) {}
+      },
+
+      playSuccess() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const t = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, t + i * 0.07);
+            gain.gain.setValueAtTime(0.1, t + i * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.07 + 0.28);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(t + i * 0.07);
+            osc.stop(t + i * 0.07 + 0.28);
+          });
+        } catch (e) {}
+      },
+
+      playError() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const t = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, t);
+          osc.frequency.linearRampToValueAtTime(100, t + 0.06);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.06);
+        } catch (e) {}
+      }
+    };
+
+    /**
+     * Frequent Civil / Proc Statutory Keywords for Blank (Cloze) Mode
+     */
+    const LAW_KEYWORDS = [
+      '무효', '취소', '선의', '악의', '제삼자', '제3자', '과실', '대항하지', '대항할', '대항',
+      '추인', '해제', '해지', '손해배상', '소멸시효', '제척기간', '입증', '증명', '기판력',
+      '당사자능력', '소송능력', '직권', '신청', '전속관할', '합의관할', '변론관할', '소취하',
+      '기각', '인용', '가집행', '상소', '항소', '상고', '재심', '독촉', '이의신청', '담보',
+      '공탁', '강제집행', '등기', '점유', '소유권', '취득시효', '유치권', '질권', '저당권',
+      '채권자대위권', '채권자취소권', '채무불이행', '불법행위', '부당이득', '통정', '허위',
+      '착오', '사기', '강박', '비진의', '법정대리인', '동의', '허락', '성년', '미성년자',
+      '신의성실', '권리남용', '공용징수', '경매', '상속', '선의취득', '주위토지통행권', '부합',
+      '지상권', '지역권', '전세권', '법정지상권', '이행지체', '이행불능', '위험부담', '대상청구권',
+      '채무인수', '변제', '상계', '경개', '면제', '혼동', '계약금', '해약금', '담보책임', '임대차'
+    ];
+
+    /**
+     * Hangul Jamo Decomposition & Levenshtein Distance
+     */
+    const HangulUtils = {
+      CHOSUNG: ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],
+      JUNGSUNG: ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'],
+      JONGSUNG: ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'],
+
+      decomposeChar(ch) {
+        const code = ch.charCodeAt(0);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+          const base = code - 0xAC00;
+          const cho = Math.floor(base / 588);
+          const jung = Math.floor((base % 588) / 28);
+          const jong = base % 28;
+          return this.CHOSUNG[cho] + this.JUNGSUNG[jung] + (this.JONGSUNG[jong] || '');
+        }
+        return ch;
+      },
+
+      decomposeStr(str) {
+        return str.split('').map(c => this.decomposeChar(c)).join('');
+      },
+
+      levenshtein(a, b) {
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= b.length; i++) {
+          for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+              matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+              matrix[i][j] = Math.min(
+                matrix[i - 1][j - 1] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j] + 1
+              );
+            }
+          }
+        }
+        return matrix[b.length][a.length];
+      },
+
+      calcSimilarity(targetWord, typedWord) {
+        if (!targetWord || !typedWord) return 0;
+        if (targetWord === typedWord) return 1.0;
+
+        const decompTarget = this.decomposeStr(targetWord);
+        const decompTyped = this.decomposeStr(typedWord);
+
+        const dist = this.levenshtein(decompTarget, decompTyped);
+        const maxLen = Math.max(decompTarget.length, decompTyped.length);
+        if (maxLen === 0) return 1.0;
+        return Math.max(0, (maxLen - dist) / maxLen);
+      },
+
+      extractChosung(str) {
+        if (!str) return '';
+        return str.split('').map(ch => {
+          const code = ch.charCodeAt(0);
+          if (code >= 0xAC00 && code <= 0xD7A3) {
+            const base = code - 0xAC00;
+            const cho = Math.floor(base / 588);
+            return this.CHOSUNG[cho];
+          }
+          return ch;
+        }).join('');
+      }
+    };
+
+    /**
+     * Court Official Exam 4 Core Trap Keyword Categories (법원직 4대 함정 키워드)
+     */
+    const LAW_TRAP_CATEGORIES = {
+      effects: [
+        '무효', '취소', '각하', '기각', '인용', '유효', '효력', '대항하지', '추인',
+        '해제', '해지', '손해배상', '부당이득', '불법행위', '가집행', '면제', '상계', '소멸'
+      ],
+      jurisdictions: [
+        '보통재판적', '특별재판적', '전속관할', '합의관할', '변론관할', '수소법원', '집행법원',
+        '지방법원', '단독판사', '합의부', '대법원', '법원행정처', '당사자능력', '소송능력'
+      ],
+      numbers: [
+        '30일', '14일', '2주', '1주일', '1개월', '3월', '6월', '1년', '2년', '3년', '5년', '10년', '20년',
+        '과반수', '3분의 2', '3분의 1', '전원일치', '2인'
+      ],
+      requirements: [
+        '선의', '악의', '무과실', '과실없이', '중대한 과실', '정당한 사유', '소멸시효', '제척기간',
+        '채권자대위권', '채권자취소권', '법정지상권', '주위토지통행권', '신의성실', '권리남용', '점유', '등기'
+      ]
+    };
+
+    function generateDistractors(targetWord) {
+      let pool = [];
+      for (const cat in LAW_TRAP_CATEGORIES) {
+        if (LAW_TRAP_CATEGORIES[cat].some(k => targetWord.includes(k))) {
+          pool = LAW_TRAP_CATEGORIES[cat].filter(k => !targetWord.includes(k));
+          break;
+        }
+      }
+      if (pool.length < 3) {
+        pool = LAW_KEYWORDS.filter(k => !targetWord.includes(k));
+      }
+      const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
+      const choices = [...shuffled];
+      const correctIdx = Math.floor(Math.random() * 4);
+      choices.splice(correctIdx, 0, targetWord);
+      return { choices, correctIdx };
+    }
+
+    /**
+     * LawTyping Application Controller
+     */
+    class LawTypingApp {
+      constructor() {
+        this.currentSubject = 'civil'; // 'civil' | 'proc'
+        this.selectedArticleIds = new Set();
+        this.fuzzyMode = true; // Relaxed fuzzy space pass
+        this.trainingMode = 'full'; // 'full' | 'blank'
+        this.orderMode = 'sequential'; // 'sequential' | 'random'
+        this.isShuffleMode = localStorage.getItem('lawtyping_shuffle') === 'true';
+        if (this.isShuffleMode) this.orderMode = 'random';
+        this.showHierarchy = localStorage.getItem('lawtyping_hierarchy') !== 'false';
+        this.isComposing = false;
+        this.isTransitioning = false;
+        this.isPaused = false;
+        this.lastEscTime = 0;
+        
+        // Practice Session
+        this.practiceArticles = [];
+        this.currentArticleIndex = 0;
+        this.currentWords = [];
+        this.currentWordIndex = 0;
+        this.wordResults = [];
+        this.mistakes = [];
+
+        // Performance Stats
+        this.startTime = null;
+        this.timerInterval = null;
+        this.totalTypedChars = 0;
+        this.correctChars = 0;
+
+        // Blank Arcade Properties
+        this.timeAttackEnabled = localStorage.getItem('lawtyping_timeattack') !== 'false';
+        this.timeAttackInterval = null;
+        this.blankStartTime = null;
+        this.hintStage = 0; // 0: blind, 1: chosung, 2: 4-choice quickpad
+        this.currentCombo = 0;
+        this.maxCombo = 0;
+        this.recallLatencies = [];
+        this.currentQuickpadChoices = [];
+        this.accordionSearchQuery = '';
+
+        this.initTheme();
+        this.initSoundUI();
+        this.initElements();
+        this.initDefaultSelection();
+        this.showHomeView();
+      }
+
+      initTheme() {
+        if (localStorage.getItem('lawtyping_dark') === 'true' || 
+            (!('lawtyping_dark' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+
+      toggleDarkMode() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('lawtyping_dark', isDark);
+      }
+
+      initSoundUI() {
+        const icon = document.getElementById('soundIcon');
+        const text = document.getElementById('soundText');
+        const btn = document.getElementById('soundToggleBtn');
+        if (!SoundEngine.enabled) {
+          if (icon) icon.textContent = '🔇';
+          if (text) text.textContent = '사운드 끔';
+          if (btn) btn.title = '사운드: 끔 (클릭 시 기계식)';
+        } else {
+          const p = SoundEngine.profiles[SoundEngine.soundType] || SoundEngine.profiles.mechanical;
+          if (icon) icon.textContent = p.icon;
+          if (text) text.textContent = p.name;
+          if (btn) btn.title = `사운드: ${p.name} (클릭 시 전환)`;
+        }
+      }
+
+      toggleSound() {
+        if (!SoundEngine.enabled) {
+          SoundEngine.enabled = true;
+          SoundEngine.soundType = 'mechanical';
+        } else {
+          const curIdx = SoundEngine.profileOrder.indexOf(SoundEngine.soundType);
+          if (curIdx < SoundEngine.profileOrder.length - 1) {
+            SoundEngine.soundType = SoundEngine.profileOrder[curIdx + 1];
+          } else {
+            SoundEngine.enabled = false;
+          }
+        }
+        localStorage.setItem('lawtyping_sound', SoundEngine.enabled);
+        localStorage.setItem('lawtyping_sound_type', SoundEngine.soundType);
+        this.initSoundUI();
+        this.updateModalUI();
+        if (SoundEngine.enabled) SoundEngine.playKey();
+      }
+
+      toggleHierarchy() {
+        this.showHierarchy = !this.showHierarchy;
+        localStorage.setItem('lawtyping_hierarchy', this.showHierarchy);
+        this.renderWordsBox();
+        SoundEngine.playKey();
+      }
+
+      toggleTimeAttack() {
+        this.timeAttackEnabled = !this.timeAttackEnabled;
+        localStorage.setItem('lawtyping_timeattack', this.timeAttackEnabled);
+        if (this.trainingMode === 'blank') {
+          this.setupNextBlankTimer();
+        }
+        SoundEngine.playKey();
+      }
+
+      toggleFuzzyMode() {
+        this.fuzzyMode = !this.fuzzyMode;
+        const statModeBadge = document.getElementById('typingStatModeBadge');
+        if (statModeBadge) {
+          if (this.fuzzyMode) {
+            statModeBadge.textContent = "관용 (스페이스 패스)";
+            statModeBadge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400";
+          } else {
+            statModeBadge.textContent = "엄격 (정확 매칭)";
+            statModeBadge.className = "text-xs font-semibold px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400";
+          }
+        }
+        SoundEngine.playKey();
+      }
+
+      get currentInput() {
+        return (this.trainingMode === 'blank') ? this.blankPlayInput : this.typingPlayInput;
+      }
+
+      initElements() {
+        this.homeView = document.getElementById('homeView');
+        this.typingSetupView = document.getElementById('typingSetupView');
+        this.typingPlayView = document.getElementById('typingPlayView');
+        this.blankSetupView = document.getElementById('blankSetupView');
+        this.blankPlayView = document.getElementById('blankPlayView');
+        this.resultView = document.getElementById('resultView');
+        this.pauseModal = document.getElementById('pauseSettingsModal');
+        this.transitionOverlay = document.getElementById('articleTransitionOverlay');
+
+        this.typingPlayInput = document.getElementById('typingPlayInput');
+        this.blankPlayInput = document.getElementById('blankPlayInput');
+
+        this.setupInputField(this.typingPlayInput, false);
+        this.setupInputField(this.blankPlayInput, true);
+
+        // Global Shortcuts (Window Level)
+        window.addEventListener('keydown', (e) => {
+          const pauseModal = document.getElementById('pauseSettingsModal');
+          const isModalOpen = pauseModal && !pauseModal.classList.contains('hidden');
+
+          if (e.key === 'Escape') {
+            const now = Date.now();
+            if (now - this.lastEscTime < 250) return;
+            this.lastEscTime = now;
+
+            const isTypingPlay = this.typingPlayView && !this.typingPlayView.classList.contains('hidden');
+            const isBlankPlay = this.blankPlayView && !this.blankPlayView.classList.contains('hidden');
+
+            if (isModalOpen) {
+              e.preventDefault();
+              this.resumePractice();
+            } else if (isTypingPlay || isBlankPlay) {
+              e.preventDefault();
+              this.togglePauseSettings(true);
+            }
+          } else if (e.key === 'Enter') {
+            if (isModalOpen) {
+              e.preventDefault();
+              this.resumePractice();
+            } else if (this.typingSetupView && !this.typingSetupView.classList.contains('hidden') && e.target.tagName !== 'INPUT') {
+              e.preventDefault();
+              this.startTypingPractice();
+            } else if (this.blankSetupView && !this.blankSetupView.classList.contains('hidden') && e.target.tagName !== 'INPUT') {
+              e.preventDefault();
+              this.startBlankPractice();
+            }
+          }
+        });
+      }
+
+      setupInputField(inputEl, isBlankMode) {
+        if (!inputEl) return;
+
+        inputEl.addEventListener('compositionstart', () => {
+          this.isComposing = true;
+        });
+
+        inputEl.addEventListener('compositionend', () => {
+          this.isComposing = false;
+        });
+
+        inputEl.addEventListener('input', (e) => {
+          if (this.isTransitioning || this.isPaused) {
+            inputEl.value = '';
+            return;
+          }
+
+          if (e.inputType && e.inputType.startsWith('delete')) {
+            this.handleLiveInputMatching();
+            return;
+          }
+
+          const val = inputEl.value;
+          SoundEngine.playKey();
+
+          if (!isBlankMode && val.endsWith(' ')) {
+            const wordToSubmit = val.slice(0, -1).trim();
+            if (wordToSubmit) {
+              this.submitCurrentWord(wordToSubmit);
+              inputEl.value = '';
+              return;
+            } else {
+              inputEl.value = '';
+              return;
+            }
+          }
+
+          this.handleLiveInputMatching();
+        });
+
+        inputEl.addEventListener('keydown', (e) => {
+          if (this.isTransitioning || this.isPaused) {
+            e.preventDefault();
+            inputEl.value = '';
+            return;
+          }
+
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation();
+            const now = Date.now();
+            if (now - this.lastEscTime < 250) return;
+            this.lastEscTime = now;
+            this.togglePauseSettings(true);
+            return;
+          }
+
+          if (isBlankMode && this.hintStage === 2 && ['1', '2', '3', '4'].includes(e.key)) {
+            e.preventDefault();
+            e.stopPropagation();
+            const choiceIdx = parseInt(e.key, 10) - 1;
+            this.selectQuickpadChoice(choiceIdx);
+            return;
+          }
+
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (this.isComposing || e.isComposing) return;
+            const wordToSubmit = inputEl.value.trim();
+            if (wordToSubmit) {
+              this.submitCurrentWord(wordToSubmit);
+              inputEl.value = '';
+            }
+          } else if ((e.key === 'h' || e.key === 'H') && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleHint();
+          } else if (!isBlankMode && e.key === 'Backspace' && inputEl.value === '' && this.currentWordIndex > 0) {
+            e.preventDefault();
+            this.currentWordIndex--;
+            const prevResult = this.wordResults.pop();
+            if (this.mistakes.length > 0 && this.mistakes[this.mistakes.length - 1].target === this.currentWords[this.currentWordIndex]) {
+              this.mistakes.pop();
+            }
+            if (prevResult) {
+              this.totalTypedChars = Math.max(0, this.totalTypedChars - prevResult.typed.length);
+              if (prevResult.target === prevResult.typed) {
+                this.correctChars = Math.max(0, this.correctChars - prevResult.target.length);
+              } else {
+                this.correctChars = Math.max(0, this.correctChars - Math.round(prevResult.target.length * prevResult.similarity));
+              }
+            }
+            this.renderWordsBox();
+            inputEl.value = prevResult ? prevResult.typed : '';
+            this.handleLiveInputMatching();
+            return;
+          }
+        });
+      }
+
+      initDefaultSelection() {
+        const defaultCivil = ['civ_제1조', 'civ_제2조', 'civ_제103조', 'civ_제108조', 'civ_제186조'];
+        defaultCivil.forEach(id => this.selectedArticleIds.add(id));
+      }
+
+      /* ======================================================== */
+      /* SCREEN ROUTING & PRESET MANAGEMENT */
+      /* ======================================================== */
+
+      showHomeView() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.timeAttackInterval) {
+          clearInterval(this.timeAttackInterval);
+          this.timeAttackInterval = null;
+        }
+        if (this.homeView) this.homeView.classList.remove('hidden');
+        if (this.typingSetupView) this.typingSetupView.classList.add('hidden');
+        if (this.typingPlayView) this.typingPlayView.classList.add('hidden');
+        if (this.blankSetupView) this.blankSetupView.classList.add('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.add('hidden');
+        const bar = document.getElementById('selectorStickyBar');
+        if (bar) bar.classList.add('translate-y-full');
+        this.updateHomeCards();
+      }
+
+      setHomeMode(mode) {
+        this.trainingMode = mode;
+        this.updateHomeCards();
+        SoundEngine.playKey();
+      }
+
+      setHomeSubject(subject) {
+        this.currentSubject = subject;
+        this.updateHomeCards();
+        SoundEngine.playKey();
+      }
+
+      updateHomeCards() {
+        const cardFull = document.getElementById('homeCardModeFull');
+        const cardBlank = document.getElementById('homeCardModeBlank');
+        const badgeFull = document.getElementById('homeBadgeModeFull');
+        const badgeBlank = document.getElementById('homeBadgeModeBlank');
+
+        const activeModeClass = "p-6 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-sm";
+        const inactiveModeClass = "p-6 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#1E293B] hover:border-indigo-400 shadow-sm";
+
+        if (cardFull && cardBlank) {
+          cardFull.className = (this.trainingMode === 'full') ? activeModeClass : inactiveModeClass;
+          cardBlank.className = (this.trainingMode === 'blank') ? activeModeClass : inactiveModeClass;
+        }
+        if (badgeFull) {
+          badgeFull.textContent = (this.trainingMode === 'full') ? "선택됨 ✓" : "클릭하여 선택";
+          badgeFull.className = (this.trainingMode === 'full')
+            ? "text-xs font-bold font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400"
+            : "text-xs font-bold font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500";
+        }
+        if (badgeBlank) {
+          badgeBlank.textContent = (this.trainingMode === 'blank') ? "선택됨 ✓" : "클릭하여 선택";
+          badgeBlank.className = (this.trainingMode === 'blank')
+            ? "text-xs font-bold font-mono px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400"
+            : "text-xs font-bold font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500";
+        }
+
+        const cardCivil = document.getElementById('homeCardSubCivil');
+        const cardProc = document.getElementById('homeCardSubProc');
+        const badgeCivil = document.getElementById('homeBadgeSubCivil');
+        const badgeProc = document.getElementById('homeBadgeSubProc');
+        const proceedText = document.getElementById('homeProceedBtnText');
+
+        if (cardCivil && cardProc) {
+          cardCivil.className = (this.currentSubject === 'civil') ? activeModeClass : inactiveModeClass;
+          cardProc.className = (this.currentSubject === 'proc') ? activeModeClass : inactiveModeClass;
+        }
+        if (badgeCivil) {
+          badgeCivil.textContent = (this.currentSubject === 'civil') ? "선택됨 ✓" : "클릭하여 선택";
+          badgeCivil.className = (this.currentSubject === 'civil') ? "font-bold text-indigo-600 dark:text-indigo-400" : "text-slate-400";
+        }
+        if (badgeProc) {
+          badgeProc.textContent = (this.currentSubject === 'proc') ? "선택됨 ✓" : "클릭하여 선택";
+          badgeProc.className = (this.currentSubject === 'proc') ? "font-bold text-sky-600 dark:text-sky-400" : "text-slate-400";
+        }
+
+        const subName = (this.currentSubject === 'civil') ? "민법" : "민사소송법";
+        const modeName = (this.trainingMode === 'blank') ? "빈칸연습" : "타자연습";
+        if (proceedText) proceedText.textContent = `🚀 ${subName} ${modeName} 설정하기 →`;
+      }
+
+      proceedFromHome() {
+        if (this.trainingMode === 'blank') {
+          this.showBlankSetupView();
+        } else {
+          this.showTypingSetupView();
+        }
+        SoundEngine.playKey();
+      }
+
+      showTypingSetupView() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.timeAttackInterval) {
+          clearInterval(this.timeAttackInterval);
+          this.timeAttackInterval = null;
+        }
+        if (this.homeView) this.homeView.classList.add('hidden');
+        if (this.typingSetupView) this.typingSetupView.classList.remove('hidden');
+        if (this.typingPlayView) this.typingPlayView.classList.add('hidden');
+        if (this.blankSetupView) this.blankSetupView.classList.add('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.add('hidden');
+        const bar = document.getElementById('selectorStickyBar');
+        if (bar) bar.classList.add('translate-y-full');
+
+        const subBadge = document.getElementById('typingSetupSubjectBadge');
+        if (subBadge) subBadge.textContent = (this.currentSubject === 'civil') ? "⚖️ 민법" : "🏛️ 민사소송법";
+        const part1Text = document.getElementById('typingPart1PresetText');
+        if (part1Text) part1Text.textContent = (this.currentSubject === 'civil') ? "민총 전체" : "민소 총칙 전체";
+
+        this.updateSetupCounts('typing');
+        this.updateOrderUI();
+        SoundEngine.playKey();
+      }
+
+      showBlankSetupView() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.timeAttackInterval) {
+          clearInterval(this.timeAttackInterval);
+          this.timeAttackInterval = null;
+        }
+        if (this.homeView) this.homeView.classList.add('hidden');
+        if (this.typingSetupView) this.typingSetupView.classList.add('hidden');
+        if (this.typingPlayView) this.typingPlayView.classList.add('hidden');
+        if (this.blankSetupView) this.blankSetupView.classList.remove('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.add('hidden');
+        const bar = document.getElementById('selectorStickyBar');
+        if (bar) bar.classList.add('translate-y-full');
+
+        const subBadge = document.getElementById('blankSetupSubjectBadge');
+        if (subBadge) subBadge.textContent = (this.currentSubject === 'civil') ? "⚖️ 민법" : "🏛️ 민사소송법";
+
+        this.updateSetupCounts('blank');
+        this.updateOrderUI();
+        SoundEngine.playKey();
+      }
+
+      updateSetupCounts(targetMode) {
+        const count = this.selectedArticleIds.size;
+        const countBadgeId = (targetMode === 'blank') ? 'blankSetupCountBadge' : 'typingSetupCountBadge';
+        const startBtnId = (targetMode === 'blank') ? 'blankStartBtn' : 'typingStartBtn';
+
+        const badge = document.getElementById(countBadgeId);
+        if (badge) badge.textContent = `${count}개 선택됨`;
+
+        const btn = document.getElementById(startBtnId);
+        if (btn) btn.disabled = (count === 0);
+      }
+
+      setOrderMode(mode) {
+        this.orderMode = mode;
+        this.isShuffleMode = (mode === 'random');
+        localStorage.setItem('lawtyping_shuffle', this.isShuffleMode);
+        this.updateOrderUI();
+        SoundEngine.playKey();
+      }
+
+      updateOrderUI() {
+        const isSeq = (this.orderMode !== 'random');
+        const activeClass = "p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-indigo-600 ring-2 ring-indigo-500/20 shadow-xs";
+        const inactiveClass = "p-4 rounded-xl border-2 transition cursor-pointer flex items-center justify-between bg-white dark:bg-[#111827] border-slate-200 dark:border-slate-800 hover:border-indigo-400 shadow-xs";
+
+        const tSeqCard = document.getElementById('typingOrderSequentialCard');
+        const tRndCard = document.getElementById('typingOrderRandomCard');
+        const tSeqBadge = document.getElementById('typingBadgeSequential');
+        const tRndBadge = document.getElementById('typingBadgeRandom');
+
+        if (tSeqCard) tSeqCard.className = isSeq ? activeClass : inactiveClass;
+        if (tRndCard) tRndCard.className = isSeq ? inactiveClass : activeClass;
+        if (tSeqBadge) {
+          tSeqBadge.textContent = isSeq ? "선택됨 ✓" : "선택";
+          tSeqBadge.className = isSeq ? "text-xs font-bold text-indigo-600 font-mono" : "text-xs text-slate-400 font-mono";
+        }
+        if (tRndBadge) {
+          tRndBadge.textContent = isSeq ? "선택" : "선택됨 ✓";
+          tRndBadge.className = isSeq ? "text-xs text-slate-400 font-mono" : "text-xs font-bold text-indigo-600 font-mono";
+        }
+
+        const bSeqCard = document.getElementById('blankOrderSequentialCard');
+        const bRndCard = document.getElementById('blankOrderRandomCard');
+        const bSeqBadge = document.getElementById('blankBadgeSequential');
+        const bRndBadge = document.getElementById('blankBadgeRandom');
+
+        if (bSeqCard) bSeqCard.className = isSeq ? activeClass : inactiveClass;
+        if (bRndCard) bRndCard.className = isSeq ? inactiveClass : activeClass;
+        if (bSeqBadge) {
+          bSeqBadge.textContent = isSeq ? "선택됨 ✓" : "선택";
+          bSeqBadge.className = isSeq ? "text-xs font-bold text-indigo-600 font-mono" : "text-xs text-slate-400 font-mono";
+        }
+        if (bRndBadge) {
+          bRndBadge.textContent = isSeq ? "선택" : "선택됨 ✓";
+          bRndBadge.className = isSeq ? "text-xs text-slate-400 font-mono" : "text-xs font-bold text-indigo-600 font-mono";
+        }
+      }
+
+      selectPreset(type, targetMode) {
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        this.selectedArticleIds.clear();
+
+        if (type === 'all') {
+          list.forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'none') {
+          // cleared
+        } else if (type === 'keyTop20') {
+          list.filter(item => item.isKey).slice(0, 20).forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'random10') {
+          const shuffled = [...list].sort(() => Math.random() - 0.5);
+          shuffled.slice(0, 10).forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'random20') {
+          const shuffled = [...list].sort(() => Math.random() - 0.5);
+          shuffled.slice(0, 20).forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'random50') {
+          const shuffled = [...list].sort(() => Math.random() - 0.5);
+          shuffled.slice(0, 50).forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'clauseOnly') {
+          list.filter(item => /(다만|그러나|이\s*경우|단,)/.test(item.content)).forEach(item => this.selectedArticleIds.add(item.id));
+        } else if (type === 'part1') {
+          list.filter(item => item.part && item.part.includes('총칙')).forEach(item => this.selectedArticleIds.add(item.id));
+        }
+
+        this.updateSetupCounts(targetMode);
+        this.renderAccordionTree(targetMode);
+        SoundEngine.playKey();
+      }
+
+      toggleAccordion(mode) {
+        const accId = (mode === 'blank') ? 'blankAccordion' : 'typingAccordion';
+        const el = document.getElementById(accId);
+        if (!el) return;
+        const isHidden = el.classList.contains('hidden');
+        if (isHidden) {
+          el.classList.remove('hidden');
+          this.renderAccordionTree(mode);
+        } else {
+          el.classList.add('hidden');
+        }
+        SoundEngine.playKey();
+      }
+
+      handleSearchInput(query, mode) {
+        this.accordionSearchQuery = (query || '').trim().toLowerCase();
+        this.renderAccordionTree(mode);
+      }
+
+      renderAccordionTree(mode) {
+        const containerId = (mode === 'blank') ? 'blankArticleTreeContainer' : 'typingArticleTreeContainer';
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        const q = this.accordionSearchQuery || '';
+
+        let filtered = list;
+        if (q) {
+          filtered = filtered.filter(a => 
+            a.artNo.toLowerCase().includes(q) || 
+            (a.title && a.title.toLowerCase().includes(q)) || 
+            (a.content && a.content.toLowerCase().includes(q))
+          );
+        }
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">검색 결과가 없습니다.</div>`;
+          return;
+        }
+
+        const groups = {};
+        filtered.forEach(a => {
+          const p = a.part || '기본';
+          if (!groups[p]) groups[p] = [];
+          groups[p].push(a);
+        });
+
+        let html = '';
+        for (const [part, items] of Object.entries(groups)) {
+          const allChecked = items.every(i => this.selectedArticleIds.has(i.id));
+          const selCount = items.filter(i => this.selectedArticleIds.has(i.id)).length;
+
+          html += `
+            <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111827] overflow-hidden text-xs">
+              <div class="p-3 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <span class="font-bold text-slate-800 dark:text-slate-200">${part} (${selCount}/${items.length})</span>
+                <button type="button" onclick="app.togglePartInTree('${part}', ${!allChecked}, '${mode}')" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+                  ${allChecked ? '해제' : '전체선택'}
+                </button>
+              </div>
+              <div class="p-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                ${items.map(art => {
+                  const isChecked = this.selectedArticleIds.has(art.id);
+                  const cleanTitle = (art.title || '').replace(/\([一-龥ㆍ\s,/·0-9]+\)/g, '').replace(/[一-龥]/g, '');
+                  return `
+                    <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 border ${isChecked ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/40 dark:bg-indigo-950/20' : 'border-transparent'}">
+                      <label class="flex items-center gap-2 min-w-0 flex-1 cursor-pointer">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="app.toggleArticleInTree('${art.id}', '${mode}')" class="rounded text-indigo-600 focus:ring-0 cursor-pointer">
+                        <span class="font-bold font-mono text-slate-800 dark:text-slate-200 whitespace-nowrap">${art.artNo}</span>
+                        <span class="text-slate-500 truncate text-[11px]">${cleanTitle}</span>
+                        ${art.isKey ? '<span class="text-[9px] px-1 rounded bg-amber-100 dark:bg-amber-950 text-amber-600 font-bold whitespace-nowrap">A급</span>' : ''}
+                      </label>
+                      <button 
+                        type="button" 
+                        onclick="event.preventDefault(); event.stopPropagation(); app.startFromSpecificArticle('${art.id}', '${mode}')"
+                        class="text-[10px] px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800/60 transition cursor-pointer whitespace-nowrap shadow-2xs"
+                        title="이 조문부터 연속 훈련 시작"
+                      >
+                        시작 ▶
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+      }
+
+      toggleArticleInTree(id, mode) {
+        if (this.selectedArticleIds.has(id)) {
+          this.selectedArticleIds.delete(id);
+        } else {
+          this.selectedArticleIds.add(id);
+        }
+        this.updateSetupCounts(mode);
+        this.renderAccordionTree(mode);
+        SoundEngine.playKey();
+      }
+
+      togglePartInTree(partName, check, mode) {
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        list.filter(a => a.part === partName).forEach(a => {
+          if (check) this.selectedArticleIds.add(a.id);
+          else this.selectedArticleIds.delete(a.id);
+        });
+        this.updateSetupCounts(mode);
+        this.renderAccordionTree(mode);
+        SoundEngine.playKey();
+      }
+
+      startFromArticleInput(mode) {
+        const inputId = (mode === 'blank') ? 'blankStartFromArtNo' : 'typingStartFromArtNo';
+        const input = document.getElementById(inputId);
+        const val = (input?.value || '').trim();
+        if (!val) {
+          input?.focus();
+          return;
+        }
+        const num = val.replace(/[^0-9]/g, '');
+        if (!num) return;
+
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        const targetArt = list.find(a => {
+          const aNum = a.artNo.replace(/[^0-9]/g, '');
+          return aNum === num;
+        });
+
+        if (!targetArt) {
+          alert(`제${num}조를 찾을 수 없습니다. (현재 과목: ${this.currentSubject === 'civil' ? '민법' : '민사소송법'})`);
+          return;
+        }
+
+        this.startFromSpecificArticle(targetArt.id, mode);
+      }
+
+      startFromSpecificArticle(artId, mode) {
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        const idx = list.findIndex(a => a.id === artId);
+        if (idx === -1) return;
+
+        const count = 10;
+        const slice = list.slice(idx, idx + count);
+
+        this.selectedArticleIds.clear();
+        slice.forEach(a => this.selectedArticleIds.add(a.id));
+
+        this.orderMode = 'sequential';
+        this.updateOrderUI(mode);
+        this.updateSetupCounts(mode);
+
+        SoundEngine.playKey();
+
+        if (mode === 'blank') {
+          this.startBlankPractice();
+        } else {
+          this.startTypingPractice();
+        }
+      }
+
+      /* ======================================================== */
+      /* PLAY SESSIONS & PRACTICE ENGINES */
+      /* ======================================================== */
+
+      startTypingPractice() {
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        if (this.selectedArticleIds.size === 0) {
+          list.filter(a => a.isKey).slice(0, 10).forEach(a => this.selectedArticleIds.add(a.id));
+        }
+
+        this.practiceArticles = list.filter(a => this.selectedArticleIds.has(a.id));
+        if (this.practiceArticles.length === 0) {
+          this.practiceArticles = list.slice(0, 10);
+        }
+
+        if (this.orderMode === 'random') {
+          for (let i = this.practiceArticles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.practiceArticles[i], this.practiceArticles[j]] = [this.practiceArticles[j], this.practiceArticles[i]];
+          }
+        }
+
+        this.trainingMode = 'full';
+        this.currentArticleIndex = 0;
+        this.mistakes = [];
+        this.totalTypedChars = 0;
+        this.correctChars = 0;
+        this.startTime = Date.now();
+
+        if (this.homeView) this.homeView.classList.add('hidden');
+        if (this.typingSetupView) this.typingSetupView.classList.add('hidden');
+        if (this.blankSetupView) this.blankSetupView.classList.add('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.add('hidden');
+        if (this.typingPlayView) this.typingPlayView.classList.remove('hidden');
+
+        this.loadArticle(0);
+        this.startTimer();
+      }
+
+      startBlankPractice() {
+        const list = (window.LAW_DATA && window.LAW_DATA[this.currentSubject]) || [];
+        if (this.selectedArticleIds.size === 0) {
+          list.filter(a => a.isKey).slice(0, 10).forEach(a => this.selectedArticleIds.add(a.id));
+        }
+
+        this.practiceArticles = list.filter(a => this.selectedArticleIds.has(a.id));
+        if (this.practiceArticles.length === 0) {
+          this.practiceArticles = list.slice(0, 10);
+        }
+
+        if (this.orderMode === 'random') {
+          for (let i = this.practiceArticles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.practiceArticles[i], this.practiceArticles[j]] = [this.practiceArticles[j], this.practiceArticles[i]];
+          }
+        }
+
+        this.trainingMode = 'blank';
+        this.currentArticleIndex = 0;
+        this.mistakes = [];
+        this.totalTypedChars = 0;
+        this.correctChars = 0;
+        this.currentCombo = 0;
+        this.maxCombo = 0;
+        this.recallLatencies = [];
+        this.startTime = Date.now();
+
+        if (this.homeView) this.homeView.classList.add('hidden');
+        if (this.typingSetupView) this.typingSetupView.classList.add('hidden');
+        if (this.blankSetupView) this.blankSetupView.classList.add('hidden');
+        if (this.typingPlayView) this.typingPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.add('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.remove('hidden');
+
+        this.loadArticle(0);
+        this.startTimer();
+      }
+
+      showTransitionToast(article, index, totalCount) {
+        const overlay = document.getElementById('articleTransitionOverlay');
+        const card = document.getElementById('transitionCard');
+        if (!overlay || !card || !article) return;
+
+        const subBadge = document.getElementById('transSubjectBadge');
+        const keyBadge = document.getElementById('transKeyBadge');
+        const artNo = document.getElementById('transArticleNo');
+        const artTitle = document.getElementById('transArticleTitle');
+        const path = document.getElementById('transPath');
+        const prog = document.getElementById('transProgress');
+
+        if (subBadge) subBadge.textContent = article.law || (this.currentSubject === 'civil' ? '민법' : '민사소송법');
+        if (keyBadge) keyBadge.style.display = article.isKey ? 'inline-block' : 'none';
+        if (artNo) artNo.textContent = article.artNo;
+        const cleanTitle = (article.title || '').replace(/\([一-龥ㆍ\s,/·0-9]+\)/g, '').replace(/[一-龥]/g, '');
+        if (artTitle) artTitle.textContent = cleanTitle ? `(${cleanTitle})` : '';
+        if (path) path.textContent = `${article.part || ''} ${article.chapter ? '> ' + article.chapter : ''}`;
+        if (prog) prog.textContent = `${index + 1} / ${totalCount} 조문`;
+
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          overlay.classList.remove('opacity-0');
+          overlay.classList.add('opacity-100');
+          card.classList.remove('scale-90');
+          card.classList.add('scale-100');
+        });
+
+        setTimeout(() => {
+          overlay.classList.remove('opacity-100');
+          overlay.classList.add('opacity-0');
+          card.classList.remove('scale-100');
+          card.classList.add('scale-105');
+          setTimeout(() => {
+            overlay.classList.add('hidden');
+            card.classList.remove('scale-105');
+            card.classList.add('scale-90');
+            if (this.currentInput) this.currentInput.focus();
+          }, 180);
+        }, 550);
+      }
+
+      loadArticle(index) {
+        if (index >= this.practiceArticles.length) {
+          this.finishPractice();
+          return;
+        }
+
+        this.isTransitioning = true;
+        if (this.currentInput) {
+          this.currentInput.value = '';
+          this.currentInput.blur();
+        }
+
+        const rawArticle = this.practiceArticles[index];
+        this.currentWordIndex = 0;
+        this.wordResults = [];
+        this.showHint = false;
+        this.hintStage = 0;
+
+        // Trigger interstitial flash toast
+        this.showTransitionToast(rawArticle, index, this.practiceArticles.length);
+
+        // 1. Domain Conceptual Model
+        const conceptual = (window.LawExternalSchema && window.LawExternalSchema.Parser)
+          ? window.LawExternalSchema.Parser.parseToConceptualArticle(rawArticle)
+          : null;
+        this.currentConceptual = conceptual;
+
+        // 2. Project into Schema
+        if (this.trainingMode === 'blank' && window.LawExternalSchema) {
+          this.clozeSchema = window.LawExternalSchema.Projector.projectToClozeArcadeSchema(
+            conceptual,
+            'balanced',
+            { currentIndex: index, totalCount: this.practiceArticles.length }
+          );
+          this.activeSchema = this.clozeSchema;
+          this.currentWords = this.clozeSchema.blanks.map(b => b.cleanAnswer);
+          this.clozeBlanks = this.clozeSchema.blanks;
+        } else if (window.LawExternalSchema) {
+          this.transSchema = window.LawExternalSchema.Projector.projectToTranscriptionSchema(
+            conceptual,
+            0,
+            { currentIndex: index, totalCount: this.practiceArticles.length }
+          );
+          this.activeSchema = this.transSchema;
+          this.activeTokens = this.transSchema.flatTokens;
+          this.currentWords = this.activeTokens.map(t => t.typeTarget);
+        }
+
+        const fz = (this.activeSchema && this.activeSchema.focusZone) ? this.activeSchema.focusZone : {
+          lawSubject: rawArticle.law || (this.currentSubject === 'civil' ? '민법' : '민사소송법'),
+          articleNo: rawArticle.artNo || '',
+          clauseBadge: '제1항',
+          articleTitle: rawArticle.title ? `(${rawArticle.title})` : '',
+          isKey: !!rawArticle.isKey,
+          pathBreadcrumb: `${rawArticle.part || ''} ${rawArticle.chapter ? '> ' + rawArticle.chapter : ''}`,
+          progressText: `${index + 1} / ${this.practiceArticles.length} 조문`
+        };
+
+        const currentCount = index + 1;
+        const totalCount = this.practiceArticles.length;
+        const progressPct = `${(currentCount / totalCount) * 100}%`;
+
+        if (this.trainingMode === 'blank') {
+          const lBadge = document.getElementById('blankPlayLawBadge');
+          const pText = document.getElementById('blankPlayPathText');
+          const aTitle = document.getElementById('blankPlayArticleTitle');
+          const progText = document.getElementById('blankPlayProgressText');
+          const progBar = document.getElementById('blankPlayProgressBar');
+
+          if (lBadge) lBadge.textContent = fz.lawSubject;
+          if (pText) pText.textContent = fz.pathBreadcrumb;
+          if (aTitle) aTitle.innerHTML = `<span>${fz.articleNo} ${fz.articleTitle}</span> ${fz.isKey ? '<span class="text-xs px-2 py-0.5 rounded font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">빈출 A급</span>' : ''}`;
+          if (progText) progText.textContent = `${currentCount} / ${totalCount} 조문`;
+          if (progBar) progBar.style.width = progressPct;
+
+          const fLaw = document.getElementById('blankFocusLawBadge');
+          const fTitle = document.getElementById('blankFocusTitleText');
+          const fClause = document.getElementById('blankFocusClauseBadge');
+          const fKey = document.getElementById('blankFocusKeyBadge');
+          const fPart = document.getElementById('blankFocusPartText');
+          const fProg = document.getElementById('blankFocusArticleProgress');
+
+          if (fLaw) fLaw.textContent = `${fz.lawSubject} ${fz.articleNo}`;
+          if (fTitle) fTitle.textContent = fz.articleTitle;
+          if (fClause) fClause.textContent = fz.clauseBadge;
+          if (fKey) fKey.style.display = fz.isKey ? 'inline-block' : 'none';
+          if (fPart) fPart.textContent = fz.pathBreadcrumb;
+          if (fProg) fProg.textContent = `${currentCount} / ${totalCount} 조문`;
+
+          const aContent = document.getElementById('blankAnswerStatuteContent');
+          const aBadge = document.getElementById('blankAnswerStatuteBadge');
+          if (aContent) aContent.classList.add('hidden');
+          if (aBadge) aBadge.textContent = "펼치기 ▼";
+
+          this.renderWordsBox();
+          if (this.blankPlayInput) {
+            this.blankPlayInput.value = '';
+            this.blankPlayInput.placeholder = "[ ? ] 빈칸의 단어를 입력하고 ↵ Return (⌘ Cmd+H: 힌트)...";
+          }
+          if (this.timeAttackEnabled) {
+            this.setupNextBlankTimer();
+          }
+        } else {
+          const lBadge = document.getElementById('typingPlayLawBadge');
+          const pText = document.getElementById('typingPlayPathText');
+          const aTitle = document.getElementById('typingPlayArticleTitle');
+          const progText = document.getElementById('typingPlayProgressText');
+          const progBar = document.getElementById('typingPlayProgressBar');
+
+          if (lBadge) lBadge.textContent = fz.lawSubject;
+          if (pText) pText.textContent = fz.pathBreadcrumb;
+          if (aTitle) aTitle.innerHTML = `<span>${fz.articleNo} ${fz.articleTitle}</span> ${fz.isKey ? '<span class="text-xs px-2 py-0.5 rounded font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50">빈출 A급</span>' : ''}`;
+          if (progText) progText.textContent = `${currentCount} / ${totalCount} 조문`;
+          if (progBar) progBar.style.width = progressPct;
+
+          const fLaw = document.getElementById('typingFocusLawBadge');
+          const fTitle = document.getElementById('typingFocusTitleText');
+          const fClause = document.getElementById('typingFocusClauseBadge');
+          const fKey = document.getElementById('typingFocusKeyBadge');
+          const fPart = document.getElementById('typingFocusPartText');
+          const fProg = document.getElementById('typingFocusArticleProgress');
+
+          if (fLaw) fLaw.textContent = `${fz.lawSubject} ${fz.articleNo}`;
+          if (fTitle) fTitle.textContent = fz.articleTitle;
+          if (fClause) fClause.textContent = fz.clauseBadge;
+          if (fKey) fKey.style.display = fz.isKey ? 'inline-block' : 'none';
+          if (fPart) fPart.textContent = fz.pathBreadcrumb;
+          if (fProg) fProg.textContent = `${currentCount} / ${totalCount} 조문`;
+
+          this.renderWordsBox();
+          if (this.typingPlayInput) {
+            this.typingPlayInput.value = '';
+            this.typingPlayInput.placeholder = "조문을 정독하며 타이핑하세요. 단어를 치고 Space를 누르면 다음 단어로 넘어갑니다...";
+          }
+        }
+
+        setTimeout(() => {
+          if (this.currentInput) {
+            this.currentInput.value = '';
+            this.isTransitioning = false;
+            this.currentInput.focus();
+          }
+        }, 250);
+      }
+
+      renderWordsBox() {
+        if (this.trainingMode === 'blank' && this.clozeSchema) {
+          const container = document.getElementById('blankWordsContainer');
+          const counter = document.getElementById('blankWordCounterText');
+          if (counter) counter.textContent = `${this.currentWordIndex} / ${this.currentWords.length} 빈칸`;
+          if (!container) return;
+
+          const activeBlank = this.clozeBlanks[this.currentWordIndex];
+          if (activeBlank) {
+            const focusClause = document.getElementById('blankFocusClauseBadge');
+            if (focusClause) focusClause.textContent = `제${activeBlank.clauseNo}항`;
+          }
+
+          if (this.hintStage === 2 && activeBlank) {
+            this.renderQuickpad(activeBlank.cleanAnswer);
+          } else {
+            this.hideQuickpad();
+          }
+
+          let html = '<div class="w-full flex flex-wrap items-baseline gap-x-2.5 gap-y-3 py-1">';
+          this.clozeSchema.displayTokens.forEach((tok) => {
+            if (tok.isBlank) {
+              const bEntity = tok.blankEntity;
+              const bIdx = this.clozeBlanks.findIndex(b => b.blankId === bEntity.blankId);
+
+              if (bIdx < this.currentWordIndex) {
+                const res = this.wordResults[bIdx];
+                if (res && res.isPass) {
+                  html += `<span class="text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-500 px-2.5 py-0.5 rounded-lg shadow-2xs text-lg md:text-xl">✓ ${tok.cleanDisplay}</span>`;
+                } else {
+                  html += `<span class="text-rose-800 dark:text-rose-300 font-semibold bg-rose-100 dark:bg-rose-950/70 border border-rose-400 px-2.5 py-0.5 rounded-lg shadow-2xs text-lg md:text-xl">✗ ${tok.cleanDisplay} <span class="text-[11px] ml-1 font-mono text-rose-500 line-through">(${res ? res.typed : '누락'})</span></span>`;
+                }
+              } else if (bIdx === this.currentWordIndex) {
+                let hintChar = ' [ ? ] ';
+                if (this.hintStage === 1) {
+                  hintChar = ` [ 초성: ${bEntity.scaffolding.level1Chosung} ] `;
+                } else if (this.hintStage === 2) {
+                  hintChar = ` [ 4지선다 선택 ] `;
+                }
+                html += `<span id="word_span_${bIdx}" class="text-indigo-900 dark:text-indigo-100 font-bold bg-indigo-100/70 dark:bg-indigo-950/70 border-b-2 border-indigo-500 px-3 py-1 rounded-lg text-lg md:text-xl active-word-focus">${hintChar}</span>`;
+              } else {
+                html += `<span class="text-indigo-600/70 dark:text-indigo-400/60 bg-indigo-50/50 dark:bg-indigo-950/30 border border-dashed border-indigo-300 dark:border-indigo-700/50 px-2.5 py-0.5 rounded-md font-mono text-xs md:text-sm">[ ? ]</span>`;
+              }
+            } else {
+              const isImp = this.showHierarchy && (tok.role === 'keyword');
+              const weightClass = isImp ? 'font-extrabold text-[#0F172A] dark:text-white' : 'font-normal text-[#64748B] dark:text-[#94A3B8]';
+              const provisoClass = tok.isProviso ? 'text-cyan-600 dark:text-cyan-400 font-bold underline decoration-cyan-400/60' : '';
+              html += `<span class="text-lg md:text-xl font-sans select-none ${weightClass} ${provisoClass}">${tok.cleanDisplay}</span>`;
+            }
+          });
+          html += '</div>';
+          container.innerHTML = html;
+
+        } else if (this.transSchema) {
+          const container = document.getElementById('typingWordsContainer');
+          const counter = document.getElementById('typingWordCounterText');
+          if (counter) counter.textContent = `${this.currentWordIndex} / ${this.currentWords.length} 어절`;
+          if (!container) return;
+
+          this.hideQuickpad();
+
+          const activeTok = this.activeTokens[this.currentWordIndex];
+          if (activeTok) {
+            const focusClause = document.getElementById('typingFocusClauseBadge');
+            if (focusClause) {
+              focusClause.textContent = activeTok.clauseMarker 
+                ? `${activeTok.clauseMarker} ${activeTok.clauseTitle}` 
+                : (activeTok.clauseTitle || '본문');
+            }
+          }
+
+          let html = '';
+          this.transSchema.clauses.forEach((clause) => {
+            html += '<div class="w-full flex flex-wrap items-baseline gap-x-2 gap-y-2.5 py-1">';
+            if (clause.clauseMarker) {
+              html += `
+                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-[#E2E8F0] dark:bg-[#1E293B] text-xs font-serif font-bold text-indigo-700 dark:text-indigo-300 select-none mr-1 shadow-2xs">
+                  ${clause.clauseMarker}
+                </span>
+              `;
+            }
+
+            clause.tokens.forEach((tok) => {
+              const idx = this.activeTokens.findIndex(t => t.tokenId === tok.tokenId);
+              if (idx === -1) {
+                html += `<span class="text-base md:text-lg font-sans text-slate-400/50">${tok.cleanDisplay}</span>`;
+                return;
+              }
+
+              let stateClass = "text-[#64748B]/70 dark:text-[#94A3B8]/60";
+              let displayText = tok.cleanDisplay;
+              let badge = "";
+
+              let weightClass = "font-medium";
+              if (this.showHierarchy) {
+                if (tok.role === 'keyword') {
+                  weightClass = "font-extrabold text-[#0F172A] dark:text-white";
+                } else if (tok.isProviso) {
+                  weightClass = "font-bold text-cyan-600 dark:text-cyan-400 underline decoration-cyan-400/60";
+                } else {
+                  weightClass = "font-normal text-[#64748B] dark:text-[#94A3B8]";
+                }
+              }
+
+              if (idx < this.currentWordIndex) {
+                const res = this.wordResults[idx];
+                if (res && res.similarity >= 0.85) {
+                  stateClass = "text-[#0F172A] dark:text-white font-bold border-b-2 border-emerald-500";
+                } else if (res && res.similarity >= 0.55) {
+                  stateClass = "text-sky-600 dark:text-sky-400 border-b-2 border-sky-500 font-semibold";
+                  badge = `<span class="text-[11px] ml-1 font-mono text-sky-500">(${res.typed})</span>`;
+                } else {
+                  stateClass = "text-rose-500 line-through decoration-rose-400";
+                  badge = `<span class="text-[11px] ml-1 font-mono text-rose-400 no-underline">(${res ? res.typed : '누락'})</span>`;
+                }
+              } else if (idx === this.currentWordIndex) {
+                stateClass = "text-[#0F172A] dark:text-white font-black active-word-focus px-1.5 py-0.5";
+              }
+
+              html += `
+                <span id="word_span_${idx}" class="transition-all duration-100 inline-flex items-baseline text-xl md:text-2xl ${weightClass} ${stateClass}">
+                  ${displayText}${badge}
+                </span>
+              `;
+            });
+
+            html += '</div>';
+          });
+
+          container.innerHTML = html;
+        }
+
+        const activeSpan = document.getElementById(`word_span_${this.currentWordIndex}`);
+        if (activeSpan) {
+          activeSpan.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+
+      toggleAnswerStatute() {
+        const content = document.getElementById('blankAnswerStatuteContent');
+        const badge = document.getElementById('blankAnswerStatuteBadge');
+        if (!content) return;
+        const isHidden = content.classList.contains('hidden');
+        if (isHidden) {
+          content.classList.remove('hidden');
+          if (badge) badge.textContent = "접기 ▲";
+          const rawArt = this.practiceArticles[this.currentArticleIndex];
+          if (rawArt) {
+            let text = rawArt.content;
+            if (this.currentWords && this.currentWords.length > 0) {
+              this.currentWords.forEach(w => {
+                if (w && w.length >= 2) {
+                  text = text.split(w).join(`<mark class="bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold px-1 rounded">${w}</mark>`);
+                }
+              });
+            }
+            content.innerHTML = `<div class="space-y-2 whitespace-pre-wrap font-serif">${text}</div>`;
+          }
+        } else {
+          content.classList.add('hidden');
+          if (badge) badge.textContent = "펼치기 ▼";
+        }
+        SoundEngine.playKey();
+      }
+
+      toggleHint() {
+        if (this.trainingMode === 'blank') {
+          this.hintStage = (this.hintStage + 1) % 3;
+          const targetWord = this.currentWords[this.currentWordIndex];
+          if (this.hintStage === 2 && targetWord) {
+            this.renderQuickpad(targetWord);
+          } else {
+            this.hideQuickpad();
+          }
+          this.updateHintBtnUI();
+          this.renderWordsBox();
+        } else {
+          this.showHint = !this.showHint;
+          this.renderWordsBox();
+        }
+        SoundEngine.playKey();
+      }
+
+      updateHintBtnUI() {
+        const hintBtn = document.getElementById('blankHintBtn');
+        if (!hintBtn) return;
+        if (this.hintStage === 1) {
+          hintBtn.innerHTML = `<span>🧩 초성 힌트</span> <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">⌘H: 4지선다</kbd>`;
+        } else if (this.hintStage === 2) {
+          hintBtn.innerHTML = `<span>🎯 4지선다 퀵패드</span> <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">1~4번 선택</kbd>`;
+        } else {
+          hintBtn.innerHTML = `<span>💡 힌트 보기</span> <kbd class="px-1.5 py-0.2 rounded bg-indigo-200/60 dark:bg-indigo-800/60 text-[10px] font-mono">⌘H</kbd>`;
+        }
+      }
+
+      renderQuickpad(targetWord) {
+        const quickpad = document.getElementById('blankQuickpad');
+        if (!quickpad || !targetWord) return;
+
+        const { choices } = generateDistractors(targetWord);
+        this.currentQuickpadChoices = choices;
+
+        quickpad.innerHTML = choices.map((choice, idx) => `
+          <button 
+            type="button"
+            onclick="app.selectQuickpadChoice(${idx})"
+            class="p-2.5 sm:p-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-[#1E293B] hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:border-indigo-400 text-left transition flex items-center justify-between shadow-2xs group cursor-pointer"
+          >
+            <span class="font-medium text-xs sm:text-sm text-[#0F172A] dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate pr-1">
+              ${idx + 1}. ${choice}
+            </span>
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-mono text-slate-500 border border-slate-200 dark:border-slate-700">
+              ${idx + 1}
+            </kbd>
+          </button>
+        `).join('');
+        quickpad.classList.remove('hidden');
+      }
+
+      hideQuickpad() {
+        const quickpad = document.getElementById('blankQuickpad');
+        if (quickpad) quickpad.classList.add('hidden');
+        this.currentQuickpadChoices = [];
+      }
+
+      selectQuickpadChoice(idx) {
+        if (!this.currentQuickpadChoices || !this.currentQuickpadChoices[idx]) return;
+        const selectedWord = this.currentQuickpadChoices[idx];
+        this.hideQuickpad();
+        this.submitCurrentWord(selectedWord);
+        if (this.currentInput) this.currentInput.value = '';
+      }
+
+      setupNextBlankTimer() {
+        if (this.timeAttackInterval) {
+          clearInterval(this.timeAttackInterval);
+          this.timeAttackInterval = null;
+        }
+        this.blankStartTime = performance.now();
+        this.hintStage = 0;
+        this.hideQuickpad();
+        this.updateHintBtnUI();
+
+        const container = document.getElementById('blankTimeAttackContainer');
+        const bar = document.getElementById('blankTimeAttackBar');
+
+        if (this.trainingMode === 'blank' && this.timeAttackEnabled) {
+          if (container) container.classList.remove('hidden');
+          const DURATION_SEC = 7.0;
+          let elapsed = 0;
+          const intervalMs = 60;
+
+          if (bar) {
+            bar.style.width = '100%';
+            bar.className = "bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-500 h-full transition-all duration-75";
+          }
+
+          this.timeAttackInterval = setInterval(() => {
+            elapsed += intervalMs / 1000;
+            const remain = Math.max(0, DURATION_SEC - elapsed);
+            const pct = (remain / DURATION_SEC) * 100;
+            if (bar) {
+              bar.style.width = `${pct}%`;
+              if (pct < 30) {
+                bar.className = "bg-rose-500 h-full transition-all duration-75";
+              } else if (pct < 60) {
+                bar.className = "bg-amber-500 h-full transition-all duration-75";
+              } else {
+                bar.className = "bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-500 h-full transition-all duration-75";
+              }
+            }
+
+            if (remain <= 0) {
+              clearInterval(this.timeAttackInterval);
+              this.timeAttackInterval = null;
+              this.handleBlankTimeout();
+            }
+          }, intervalMs);
+        } else {
+          if (container) container.classList.add('hidden');
+        }
+      }
+
+      handleBlankTimeout() {
+        if (this.isTransitioning) return;
+        const targetWord = this.currentWords[this.currentWordIndex];
+        if (!targetWord) return;
+
+        SoundEngine.playError();
+        this.currentCombo = 0;
+
+        this.recallLatencies.push(7.0);
+        this.mistakes.push({
+          article: this.practiceArticles[this.currentArticleIndex],
+          target: targetWord,
+          typed: '(시간초과)',
+          similarity: 0
+        });
+
+        this.wordResults.push({
+          target: targetWord,
+          typed: '(시간초과)',
+          similarity: 0,
+          isPass: false
+        });
+
+        this.currentWordIndex++;
+        if (this.currentInput) this.currentInput.value = '';
+
+        if (this.currentWordIndex >= this.currentWords.length) {
+          this.nextArticle();
+        } else {
+          this.renderWordsBox();
+          this.setupNextBlankTimer();
+        }
+      }
+
+      handleLiveInputMatching() {
+        if (!this.currentInput) return;
+        const typedVal = this.currentInput.value;
+        const targetWord = this.currentWords[this.currentWordIndex] || '';
+
+        const activeSpan = document.getElementById(`word_span_${this.currentWordIndex}`);
+        if (activeSpan) {
+          if (targetWord.startsWith(typedVal)) {
+            activeSpan.classList.remove('text-rose-600', 'dark:text-rose-400', 'border-rose-500');
+            if (this.trainingMode !== 'blank') {
+              activeSpan.classList.add('text-[#0F172A]', 'dark:text-white', 'active-word-focus');
+            }
+          } else {
+            activeSpan.classList.remove('text-[#0F172A]', 'dark:text-white', 'active-word-focus');
+            activeSpan.classList.add('text-rose-600', 'dark:text-rose-400', 'border-b-[2.5px]', 'border-rose-500');
+          }
+        }
+
+        this.updateStats();
+      }
+
+      submitCurrentWord(typedWord) {
+        const targetWord = this.currentWords[this.currentWordIndex];
+        if (!targetWord || !typedWord) return;
+
+        let similarity = HangulUtils.calcSimilarity(targetWord, typedWord);
+        let isExact = (targetWord === typedWord);
+        let isFuzzyPass = this.fuzzyMode && (similarity >= 0.55);
+
+        if (this.trainingMode === 'blank') {
+          const matchedKeyword = LAW_KEYWORDS.find(k => targetWord.includes(k));
+          if (matchedKeyword) {
+            if (typedWord === matchedKeyword || typedWord.includes(matchedKeyword) || (matchedKeyword.includes(typedWord) && typedWord.length >= 2)) {
+              isExact = true;
+              isFuzzyPass = true;
+              similarity = 1.0;
+            }
+          }
+          if (targetWord.startsWith(typedWord) && typedWord.length >= 2) {
+            isExact = true;
+            isFuzzyPass = true;
+            similarity = 1.0;
+          }
+        }
+
+        const isPassed = isExact || isFuzzyPass;
+
+        let latencySec = 1.0;
+        let instantCpm = 0;
+        if (this.trainingMode === 'blank') {
+          if (this.timeAttackInterval) {
+            clearInterval(this.timeAttackInterval);
+            this.timeAttackInterval = null;
+          }
+          const now = performance.now();
+          latencySec = this.blankStartTime ? ((now - this.blankStartTime) / 1000) : 1.0;
+          this.recallLatencies.push(latencySec);
+          instantCpm = Math.round((typedWord.length / Math.max(0.3, latencySec)) * 60);
+        }
+
+        if (!isPassed) {
+          SoundEngine.playError();
+          if (this.trainingMode === 'blank') {
+            this.currentCombo = 0;
+          } else if (!this.fuzzyMode) {
+            if (this.currentInput) {
+              this.currentInput.classList.add('ring-2', 'ring-rose-500');
+              setTimeout(() => this.currentInput && this.currentInput.classList.remove('ring-2', 'ring-rose-500'), 300);
+            }
+            return;
+          }
+        } else {
+          if (this.trainingMode === 'blank') {
+            SoundEngine.playSuccess();
+            this.currentCombo++;
+            if (this.currentCombo > this.maxCombo) this.maxCombo = this.currentCombo;
+          } else {
+            SoundEngine.playSpace();
+          }
+        }
+
+        this.totalTypedChars += typedWord.length;
+        if (isExact) {
+          this.correctChars += targetWord.length;
+        } else {
+          this.correctChars += Math.round(targetWord.length * similarity);
+          this.mistakes.push({
+            article: this.practiceArticles[this.currentArticleIndex],
+            target: targetWord,
+            typed: typedWord,
+            similarity: Math.round(similarity * 100),
+            latency: latencySec
+          });
+        }
+
+        this.wordResults.push({
+          target: targetWord,
+          typed: typedWord,
+          similarity: similarity,
+          isPass: isPassed,
+          latency: latencySec
+        });
+
+        this.currentWordIndex++;
+
+        if (this.currentWordIndex >= this.currentWords.length) {
+          this.nextArticle();
+        } else {
+          this.renderWordsBox();
+          if (this.trainingMode === 'blank') {
+            this.setupNextBlankTimer();
+          }
+        }
+
+        this.updateStats();
+      }
+
+      nextArticle() {
+        this.currentArticleIndex++;
+        if (this.currentArticleIndex < this.practiceArticles.length) {
+          this.loadArticle(this.currentArticleIndex);
+        } else {
+          this.finishPractice();
+        }
+      }
+
+      prevArticle() {
+        if (this.currentArticleIndex > 0) {
+          this.currentArticleIndex--;
+          this.loadArticle(this.currentArticleIndex);
+        }
+      }
+
+      skipArticle() {
+        this.nextArticle();
+      }
+
+      restartCurrentArticle() {
+        this.loadArticle(this.currentArticleIndex);
+      }
+
+      startTimer() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => {
+          const elapsedSec = Math.floor((Date.now() - this.startTime) / 1000);
+          const mm = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+          const ss = String(elapsedSec % 60).padStart(2, '0');
+          const timeEl = document.getElementById('typingStatTime');
+          if (timeEl) timeEl.textContent = `${mm}:${ss}`;
+          this.updateStats();
+        }, 500);
+      }
+
+      updateStats() {
+        if (!this.startTime) return;
+        const elapsedMin = Math.max(0.01, (Date.now() - this.startTime) / 60000);
+        const currentBufferLen = this.currentInput ? this.currentInput.value.length : 0;
+        const cpm = Math.round((this.totalTypedChars + currentBufferLen) / elapsedMin);
+        const cpmEl = document.getElementById('typingStatCpm');
+        if (cpmEl) cpmEl.textContent = isNaN(cpm) ? 0 : cpm;
+
+        const total = Math.max(1, this.totalTypedChars + currentBufferLen);
+        const accuracy = Math.min(100, Math.max(0, Math.round((this.correctChars / total) * 100)));
+        const accEl = document.getElementById('typingStatAccuracy');
+        if (accEl) accEl.textContent = isNaN(accuracy) ? 100 : accuracy;
+      }
+
+      finishPractice() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.timeAttackInterval) {
+          clearInterval(this.timeAttackInterval);
+          this.timeAttackInterval = null;
+        }
+        SoundEngine.playSuccess();
+
+        const totalElapsedSec = Math.floor((Date.now() - this.startTime) / 1000);
+        const elapsedMin = Math.max(0.01, totalElapsedSec / 60);
+        const avgCpm = Math.round(this.totalTypedChars / elapsedMin);
+        const avgAcc = Math.min(100, Math.max(0, Math.round((this.correctChars / Math.max(1, this.totalTypedChars)) * 100)));
+
+        const mm = String(Math.floor(totalElapsedSec / 60)).padStart(2, '0');
+        const ss = String(totalElapsedSec % 60).padStart(2, '0');
+
+        document.getElementById('resultAvgCpm').textContent = avgCpm;
+        document.getElementById('resultAvgAccuracy').textContent = avgAcc;
+        document.getElementById('resultTotalTime').textContent = `${mm}:${ss}`;
+        document.getElementById('resultCompletedCount').textContent = this.practiceArticles.length;
+        document.getElementById('resultSubtitle').textContent = `선택하신 ${this.practiceArticles.length}개 조문 훈련을 완료했습니다.`;
+
+        let avgLatency = 0;
+        if (this.recallLatencies.length > 0) {
+          const sum = this.recallLatencies.reduce((a, b) => a + b, 0);
+          avgLatency = (sum / this.recallLatencies.length).toFixed(1);
+        }
+
+        const diagBanner = document.getElementById('blankDiagnosticBanner');
+        const diagRank = document.getElementById('diagnosticRankBadge');
+        const diagSummary = document.getElementById('diagnosticSummary');
+        const speedrunBtn = document.getElementById('btnSpeedrunMistakes');
+        const metric3Label = document.getElementById('resultMetric3Label');
+        const metric4Label = document.getElementById('resultMetric4Label');
+
+        if (this.trainingMode === 'blank') {
+          if (diagBanner) diagBanner.classList.remove('hidden');
+          let rankText = "실전 합격권 (상위 5%)";
+          let rankColor = "bg-indigo-600";
+          let evalText = `평균 ${avgLatency}초의 즉각 인출 반응 속도로 법원직 객관식 지문 판별에 최적화되어 있습니다. (최고 콤보: ${this.maxCombo}연속)`;
+
+          if (avgAcc < 75 || avgLatency > 4.0) {
+            rankText = "인출 훈련 집중 요망";
+            rankColor = "bg-rose-600";
+            evalText = `평균 ${avgLatency}초의 지체가 발생하여 실전 시간 안배에 부담이 될 수 있습니다. 틀린 빈칸만 반복 훈련하세요.`;
+          } else if (avgAcc < 90 || avgLatency > 2.5) {
+            rankText = "안정권 (합격 가능권)";
+            rankColor = "bg-sky-600";
+            evalText = `평균 ${avgLatency}초의 준수한 인출 속도입니다. 자주 헷갈리는 함정 키워드를 더 확실히 각인하세요.`;
+          }
+
+          if (diagRank) {
+            diagRank.textContent = rankText;
+            diagRank.className = `text-xs px-2.5 py-0.5 rounded-full font-bold text-white font-mono ${rankColor}`;
+          }
+          if (diagSummary) diagSummary.textContent = evalText;
+
+          if (metric3Label) metric3Label.textContent = "평균 인출 지체";
+          document.getElementById('resultTotalTime').textContent = `${avgLatency}초`;
+          if (metric4Label) metric4Label.textContent = "최고 연속 콤보";
+          document.getElementById('resultCompletedCount').textContent = `${this.maxCombo}연속`;
+
+          if (speedrunBtn) {
+            if (this.mistakes.length > 0) {
+              speedrunBtn.classList.remove('hidden');
+              speedrunBtn.innerHTML = `<span>🔥 틀린 빈칸만 재도전 (${this.mistakes.length}개)</span>`;
+            } else {
+              speedrunBtn.classList.add('hidden');
+            }
+          }
+        } else {
+          if (diagBanner) diagBanner.classList.add('hidden');
+          if (speedrunBtn) speedrunBtn.classList.add('hidden');
+          if (metric3Label) metric3Label.textContent = "총 훈련 시간";
+          if (metric4Label) metric4Label.textContent = "정복한 조문";
+        }
+
+        const mistakeList = document.getElementById('mistakeList');
+        document.getElementById('mistakeBadge').textContent = `${this.mistakes.length}개`;
+
+        if (this.mistakes.length === 0) {
+          mistakeList.innerHTML = `
+            <div class="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs border border-emerald-200 dark:border-emerald-800/40">
+              🎉 오답 없이 완벽하게 정답을 인출하셨습니다!
+            </div>
+          `;
+        } else {
+          const uniqueMistakes = [];
+          const seen = new Set();
+          this.mistakes.forEach(m => {
+            const key = `${m.target}_${m.typed}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              uniqueMistakes.push(m);
+            }
+          });
+
+          mistakeList.innerHTML = uniqueMistakes.slice(0, 15).map(m => `
+            <div class="p-3.5 rounded-xl bg-[#FAF9F6] dark:bg-[#151515] border border-[#E8E7E4] dark:border-[#262626] flex items-center justify-between text-xs">
+              <div>
+                <span class="font-bold text-[#222] dark:text-white">${m.target}</span>
+                <span class="text-[#787774] dark:text-[#8E8D8A] mx-2">← 내가 친 것:</span>
+                <span class="text-rose-500 font-mono font-medium">${m.typed}</span>
+                <span class="text-[#787774] dark:text-[#8E8D8A] ml-2 text-[11px]">(${m.article.artNo})</span>
+              </div>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">
+                ${m.latency ? `${m.latency.toFixed(1)}s · ` : ''}유사도 ${m.similarity}%
+              </span>
+            </div>
+          `).join('');
+        }
+
+        if (this.typingPlayView) this.typingPlayView.classList.add('hidden');
+        if (this.blankPlayView) this.blankPlayView.classList.add('hidden');
+        if (this.resultView) this.resultView.classList.remove('hidden');
+      }
+
+      retryMistakeArticlesOnly() {
+        if (this.mistakes.length === 0) return;
+        const mistakeArticlesMap = new Map();
+        this.mistakes.forEach(m => {
+          if (m.article && !mistakeArticlesMap.has(m.article.id)) {
+            mistakeArticlesMap.set(m.article.id, m.article);
+          }
+        });
+        const mistakeArticles = Array.from(mistakeArticlesMap.values());
+        if (mistakeArticles.length === 0) return;
+
+        this.practiceArticles = mistakeArticles;
+        this.currentArticleIndex = 0;
+        this.mistakes = [];
+        this.totalTypedChars = 0;
+        this.correctChars = 0;
+        this.currentCombo = 0;
+        this.maxCombo = 0;
+        this.recallLatencies = [];
+        this.startTime = Date.now();
+
+        if (this.resultView) this.resultView.classList.add('hidden');
+        if (this.trainingMode === 'blank') {
+          if (this.blankPlayView) this.blankPlayView.classList.remove('hidden');
+        } else {
+          if (this.typingPlayView) this.typingPlayView.classList.remove('hidden');
+        }
+
+        this.loadArticle(0);
+        this.startTimer();
+      }
+
+      showSelectView() {
+        if (this.trainingMode === 'blank') {
+          this.showBlankSetupView();
+        } else {
+          this.showTypingSetupView();
+        }
+      }
+
+      restartSession() {
+        if (this.trainingMode === 'blank') {
+          this.startBlankPractice();
+        } else {
+          this.startTypingPractice();
+        }
+      }
+
+      /* ======================================================== */
+      /* MODAL: PAUSE & SETTINGS (ESC) */
+      /* ======================================================== */
+
+      togglePauseSettings(forceOpen) {
+        const modal = document.getElementById('pauseSettingsModal');
+        const card = document.getElementById('pauseModalCard');
+        if (!modal || !card) return;
+
+        const isCurrentlyHidden = modal.classList.contains('hidden');
+        const shouldOpen = (forceOpen !== undefined) ? forceOpen : isCurrentlyHidden;
+
+        if (shouldOpen) {
+          this.isPaused = true;
+          if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+          }
+          if (this.timeAttackInterval) {
+            clearInterval(this.timeAttackInterval);
+            this.timeAttackInterval = null;
+          }
+          if (this.currentInput) this.currentInput.blur();
+
+          this.updateModalUI();
+
+          modal.classList.remove('hidden', 'pointer-events-none');
+          requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('opacity-100');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+          });
+          SoundEngine.playKey();
+        } else {
+          this.resumePractice();
+        }
+      }
+
+      resumePractice() {
+        const modal = document.getElementById('pauseSettingsModal');
+        const card = document.getElementById('pauseModalCard');
+        if (!modal || !card) return;
+
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+
+        setTimeout(() => {
+          modal.classList.add('hidden', 'pointer-events-none');
+          this.isPaused = false;
+          this.startTimer();
+          if (this.trainingMode === 'blank' && this.timeAttackEnabled) {
+            this.setupNextBlankTimer();
+          }
+          if (this.currentInput) this.currentInput.focus();
+        }, 150);
+        SoundEngine.playKey();
+      }
+
+      updateModalUI() {
+        const rawArticle = this.practiceArticles[this.currentArticleIndex];
+        const lawBadge = document.getElementById('modalCurrentLawBadge');
+        const titleEl = document.getElementById('modalCurrentTitle');
+        const progEl = document.getElementById('modalProgressRatio');
+
+        if (rawArticle) {
+          if (lawBadge) lawBadge.textContent = `${rawArticle.law || (this.currentSubject === 'civil' ? '민법' : '민사소송법')} ${rawArticle.artNo}`;
+          if (titleEl) titleEl.textContent = rawArticle.title ? `(${rawArticle.title})` : '';
+          if (progEl) progEl.textContent = `${this.currentArticleIndex + 1} / ${this.practiceArticles.length} 조문`;
+        }
+
+
+        const soundBtn = document.getElementById('modalSoundBtn');
+        if (soundBtn) {
+          if (!SoundEngine.enabled) {
+            soundBtn.textContent = "🔇 사운드 끔";
+            soundBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 cursor-pointer";
+          } else {
+            const p = SoundEngine.profiles[SoundEngine.soundType] || SoundEngine.profiles.mechanical;
+            soundBtn.textContent = `${p.icon} ${p.name}`;
+            soundBtn.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer";
+          }
+        }
+
+        const hierBtn = document.getElementById('modalHierarchyBtn');
+        if (hierBtn) {
+          hierBtn.textContent = this.showHierarchy ? "위계 켬" : "위계 끔";
+          hierBtn.className = this.showHierarchy
+            ? "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer"
+            : "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 cursor-pointer";
+        }
+
+        const timeBtn = document.getElementById('modalTimeAttackBtn');
+        if (timeBtn) {
+          timeBtn.textContent = this.timeAttackEnabled ? "7초 제한 켬" : "타임어택 끔";
+          timeBtn.className = this.timeAttackEnabled
+            ? "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 cursor-pointer"
+            : "px-3.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 cursor-pointer";
+        }
+      }
+
+      restartCurrentArticleFromModal() {
+        this.resumePractice();
+        this.loadArticle(this.currentArticleIndex);
+      }
+
+      exitToSelectViewFromModal() {
+        const modal = document.getElementById('pauseSettingsModal');
+        if (modal) modal.classList.add('hidden', 'pointer-events-none');
+        if (this.trainingMode === 'blank') {
+          this.showBlankSetupView();
+        } else {
+          this.showTypingSetupView();
+        }
+      }
+
+      exitToHomeFromModal() {
+        const modal = document.getElementById('pauseSettingsModal');
+        if (modal) modal.classList.add('hidden', 'pointer-events-none');
+        this.showHomeView();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.app = new LawTypingApp();
+    });
+  </script>
+
+</body>
+</html>
